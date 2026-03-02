@@ -123,579 +123,736 @@ end
 %save all vectorized maps in one variable
 %compute the MEDIAN across voxels
 %compute correlation coefficient
-MD_map_GM_subjs = {};
-petCO2_CVRBOLD_GE_map_GM_subjs = {};
-petCO2_CVRASL_GE_map_GM_subjs = {};
-BOLDGM_CVRBOLD_GE_map_GM_subjs = {};
-BOLDGM_CVRASL_GE_map_GM_subjs = {};
-
-petCO2_CVRBOLD_SE_map_GM_subjs = {};
-petCO2_CVRASL_SE_map_GM_subjs = {};
-BOLDGM_CVRBOLD_SE_map_GM_subjs = {};
-BOLDGM_CVRASL_SE_map_GM_subjs = {};
-
-CVRratio_petCO2_GE_subjs = {};
-CVRratio_BOLDGM_GE_subjs = {};
-
-CVRratio_petCO2_SE_subjs = {};
-CVRratio_BOLDGM_SE_subjs = {};
 
-for i = 1:n_subjs
-    %load dwi
-    MD_map = V_MD_maps{i};
+thrs = 0:0.1:1;
 
-    %load cvr
-    petCO2_CVRBOLD_GE_map = V_petCO2_CVRBOLD_GE_maps{i};
-    petCO2_CVRASL_GE_map = V_petCO2_CVRASL_GE_maps{i};
-    BOLDGM_CVRBOLD_GE_map = V_BOLDGM_CVRBOLD_GE_maps{i};
-    BOLDGM_CVRASL_GE_map = V_BOLDGM_CVRASL_GE_maps{i};
+for thr_idx = 1:numel(thrs)
 
-    petCO2_CVRBOLD_SE_map = V_petCO2_CVRBOLD_SE_maps{i};
-    petCO2_CVRASL_SE_map = V_petCO2_CVRASL_SE_maps{i};
-    BOLDGM_CVRBOLD_SE_map = V_BOLDGM_CVRBOLD_SE_maps{i};
-    BOLDGM_CVRASL_SE_map = V_BOLDGM_CVRASL_SE_maps{i};
+    GM_PVE_thr=thrs(thr_idx);
 
-    %load pve
-    PVE_GM_dwi_map = V_PVE_GM_dwi_maps{i};
-    PVE_GM_cvr_map = V_PVE_GM_cvr_maps{i};
+    MD_map_GM_subjs = {};
+    petCO2_CVRBOLD_GE_map_GM_subjs = {};
+    petCO2_CVRASL_GE_map_GM_subjs = {};
+    BOLDGM_CVRBOLD_GE_map_GM_subjs = {};
+    BOLDGM_CVRASL_GE_map_GM_subjs = {};
 
-    %binarize
-    PVE_GM_dwi_map(PVE_GM_dwi_map>0.5)=1;
-    PVE_GM_dwi_map(PVE_GM_dwi_map<1)=0;   
-    PVE_GM_cvr_map(PVE_GM_cvr_map>0.5)=1;
-    PVE_GM_cvr_map(PVE_GM_cvr_map<1)=0; 
+    petCO2_CVRBOLD_SE_map_GM_subjs = {};
+    petCO2_CVRASL_SE_map_GM_subjs = {};
+    BOLDGM_CVRBOLD_SE_map_GM_subjs = {};
+    BOLDGM_CVRASL_SE_map_GM_subjs = {};
 
-    % PVE_GM_dwi_map(PVE_GM_dwi_map==0)=NaN;
-    % PVE_GM_cvr_map(PVE_GM_cvr_map==0)=NaN;
+    CVRratioBOLDASL_petCO2_GE_GM_subjs = {};
+    CVRratioBOLDASL_BOLDGM_GE_GM_subjs = {};
 
-    %select GM
+    CVRratioBOLDASL_petCO2_SE_GM_subjs = {};
+    CVRratioBOLDASL_BOLDGM_SE_GM_subjs = {};
 
-    MD_map_GM = MD_map.*PVE_GM_dwi_map;
+    CVRratioBOLDBOLD_petCO2_GM_subjs = {};
+    CVRratioBOLDBOLD_BOLDGM_GM_subjs = {};
 
-    petCO2_CVRBOLD_GE_map_GM = petCO2_CVRBOLD_GE_map.*PVE_GM_cvr_map;
-    petCO2_CVRASL_GE_map_GM = petCO2_CVRASL_GE_map.*PVE_GM_cvr_map;
-    BOLDGM_CVRBOLD_GE_map_GM = BOLDGM_CVRBOLD_GE_map.*PVE_GM_cvr_map;
-    BOLDGM_CVRASL_GE_map_GM = BOLDGM_CVRASL_GE_map.*PVE_GM_cvr_map;
 
-    petCO2_CVRBOLD_SE_map_GM = petCO2_CVRBOLD_SE_map.*PVE_GM_cvr_map;
-    petCO2_CVRASL_SE_map_GM = petCO2_CVRASL_SE_map.*PVE_GM_cvr_map;
-    BOLDGM_CVRBOLD_SE_map_GM = BOLDGM_CVRBOLD_SE_map.*PVE_GM_cvr_map;
-    BOLDGM_CVRASL_SE_map_GM = BOLDGM_CVRASL_SE_map.*PVE_GM_cvr_map;
-    
-    %put all zeros equal to NaN
 
-    MD_map_GM(MD_map_GM==0)=NaN;
+    for i = 1:n_subjs
 
-    petCO2_CVRBOLD_GE_map_GM(petCO2_CVRBOLD_GE_map_GM==0)=NaN;
-    petCO2_CVRASL_GE_map_GM(petCO2_CVRASL_GE_map_GM==0)=NaN;
-    BOLDGM_CVRBOLD_GE_map_GM(BOLDGM_CVRBOLD_GE_map_GM==0)=NaN;
-    BOLDGM_CVRASL_GE_map_GM(BOLDGM_CVRASL_GE_map_GM==0)=NaN;
+        %load dwi
+        MD_map = V_MD_maps{i};
 
-    petCO2_CVRBOLD_SE_map_GM(petCO2_CVRBOLD_SE_map_GM==0)=NaN;
-    petCO2_CVRASL_SE_map_GM(petCO2_CVRASL_SE_map_GM==0)=NaN;
-    BOLDGM_CVRBOLD_SE_map_GM(BOLDGM_CVRBOLD_SE_map_GM==0)=NaN;
-    BOLDGM_CVRASL_SE_map_GM(BOLDGM_CVRASL_SE_map_GM==0)=NaN;
+        %load cvr
+        petCO2_CVRBOLD_GE_map = V_petCO2_CVRBOLD_GE_maps{i};
+        petCO2_CVRASL_GE_map = V_petCO2_CVRASL_GE_maps{i};
+        BOLDGM_CVRBOLD_GE_map = V_BOLDGM_CVRBOLD_GE_maps{i};
+        BOLDGM_CVRASL_GE_map = V_BOLDGM_CVRASL_GE_maps{i};
 
-    %ratio
-    CVRratio_petCO2_GE = petCO2_CVRBOLD_GE_map_GM./petCO2_CVRASL_GE_map_GM;
-    CVRratio_BOLDGM_GE = BOLDGM_CVRBOLD_GE_map_GM./BOLDGM_CVRASL_GE_map_GM;
+        petCO2_CVRBOLD_SE_map = V_petCO2_CVRBOLD_SE_maps{i};
+        petCO2_CVRASL_SE_map = V_petCO2_CVRASL_SE_maps{i};
+        BOLDGM_CVRBOLD_SE_map = V_BOLDGM_CVRBOLD_SE_maps{i};
+        BOLDGM_CVRASL_SE_map = V_BOLDGM_CVRASL_SE_maps{i};
 
-    CVRratio_petCO2_SE = petCO2_CVRBOLD_SE_map_GM./petCO2_CVRASL_SE_map_GM;
-    CVRratio_BOLDGM_SE = BOLDGM_CVRBOLD_SE_map_GM./BOLDGM_CVRASL_SE_map_GM;
+        %evaluate if removing outliers here(!)
 
-    %append results
+        %load pve
+        PVE_GM_dwi_map = V_PVE_GM_dwi_maps{i};
+        PVE_GM_cvr_map = V_PVE_GM_cvr_maps{i};
 
-    MD_map_GM_subjs{end+1} = MD_map_GM;
-    petCO2_CVRBOLD_GE_map_GM_subjs{end+1} = petCO2_CVRBOLD_GE_map_GM;
-    petCO2_CVRASL_GE_map_GM_subjs{end+1} = petCO2_CVRASL_GE_map_GM;
-    BOLDGM_CVRBOLD_GE_map_GM_subjs{end+1} = BOLDGM_CVRBOLD_GE_map_GM;
-    BOLDGM_CVRASL_GE_map_GM_subjs{end+1} = BOLDGM_CVRASL_GE_map_GM;
-    
-    petCO2_CVRBOLD_SE_map_GM_subjs{end+1} = petCO2_CVRBOLD_SE_map_GM;
-    petCO2_CVRASL_SE_map_GM_subjs{end+1} = petCO2_CVRASL_SE_map_GM;
-    BOLDGM_CVRBOLD_SE_map_GM_subjs{end+1} = BOLDGM_CVRBOLD_SE_map_GM;
-    BOLDGM_CVRASL_SE_map_GM_subjs{end+1}= BOLDGM_CVRASL_SE_map_GM;
+        %binarize
+        PVE_GM_dwi_map(PVE_GM_dwi_map>GM_PVE_thr)=1;
+        PVE_GM_dwi_map(PVE_GM_dwi_map<1)=0;
+        PVE_GM_cvr_map(PVE_GM_cvr_map>GM_PVE_thr)=1;
+        PVE_GM_cvr_map(PVE_GM_cvr_map<1)=0;
 
-    CVRratio_petCO2_GE_subjs{end+1} = CVRratio_petCO2_GE;
-    CVRratio_BOLDGM_GE_subjs{end+1} = CVRratio_BOLDGM_GE;
+        % PVE_GM_dwi_map(PVE_GM_dwi_map==0)=NaN;
+        % PVE_GM_cvr_map(PVE_GM_cvr_map==0)=NaN;
 
-    CVRratio_petCO2_SE_subjs{end+1} = CVRratio_petCO2_SE;
-    CVRratio_BOLDGM_SE_subjs{end+1} = CVRratio_BOLDGM_SE;
-end
+        %select GM
 
+        MD_map_GM = MD_map.*PVE_GM_dwi_map;
 
-%% computing medians across voxels (in the tissue of interest)
+        petCO2_CVRBOLD_GE_map_GM = petCO2_CVRBOLD_GE_map.*PVE_GM_cvr_map;
+        petCO2_CVRASL_GE_map_GM = petCO2_CVRASL_GE_map.*PVE_GM_cvr_map;
+        BOLDGM_CVRBOLD_GE_map_GM = BOLDGM_CVRBOLD_GE_map.*PVE_GM_cvr_map;
+        BOLDGM_CVRASL_GE_map_GM = BOLDGM_CVRASL_GE_map.*PVE_GM_cvr_map;
 
-%dwi
-all_MD_map_GM_subjs = cat(4,MD_map_GM_subjs{:});
-median_MD_map_GM_subjs = nanmedian(all_MD_map_GM_subjs,4);
+        petCO2_CVRBOLD_SE_map_GM = petCO2_CVRBOLD_SE_map.*PVE_GM_cvr_map;
+        petCO2_CVRASL_SE_map_GM = petCO2_CVRASL_SE_map.*PVE_GM_cvr_map;
+        BOLDGM_CVRBOLD_SE_map_GM = BOLDGM_CVRBOLD_SE_map.*PVE_GM_cvr_map;
+        BOLDGM_CVRASL_SE_map_GM = BOLDGM_CVRASL_SE_map.*PVE_GM_cvr_map;
 
-%cvr
+        %put all zeros equal to NaN
 
-%GE
-all_petCO2_CVRBOLD_GE_map_GM_subjs = cat(4,petCO2_CVRBOLD_GE_map_GM_subjs{:});
-median_petCO2_CVRBOLD_GE_map_GM_subjs = nanmedian(all_petCO2_CVRBOLD_GE_map_GM_subjs,4);
+        MD_map_GM(MD_map_GM==0)=NaN;
 
-all_petCO2_CVRASL_GE_map_GM_subjs = cat(4,petCO2_CVRASL_GE_map_GM_subjs{:});
-median_petCO2_CVRASL_GE_map_GM_subjs = nanmedian(all_petCO2_CVRASL_GE_map_GM_subjs,4);
+        petCO2_CVRBOLD_GE_map_GM(petCO2_CVRBOLD_GE_map_GM==0)=NaN;
+        petCO2_CVRASL_GE_map_GM(petCO2_CVRASL_GE_map_GM==0)=NaN;
+        BOLDGM_CVRBOLD_GE_map_GM(BOLDGM_CVRBOLD_GE_map_GM==0)=NaN;
+        BOLDGM_CVRASL_GE_map_GM(BOLDGM_CVRASL_GE_map_GM==0)=NaN;
 
-all_BOLDGM_CVRBOLD_GE_map_GM_subjs = cat(4,BOLDGM_CVRBOLD_GE_map_GM_subjs{:});
-median_BOLDGM_CVRBOLD_GE_map_GM_subjs = nanmedian(all_BOLDGM_CVRBOLD_GE_map_GM_subjs,4);
+        petCO2_CVRBOLD_SE_map_GM(petCO2_CVRBOLD_SE_map_GM==0)=NaN;
+        petCO2_CVRASL_SE_map_GM(petCO2_CVRASL_SE_map_GM==0)=NaN;
+        BOLDGM_CVRBOLD_SE_map_GM(BOLDGM_CVRBOLD_SE_map_GM==0)=NaN;
+        BOLDGM_CVRASL_SE_map_GM(BOLDGM_CVRASL_SE_map_GM==0)=NaN;
 
-all_BOLDGM_CVRASL_GE_map_GM_subjs = cat(4,BOLDGM_CVRASL_GE_map_GM_subjs{:});
-median_BOLDGM_CVRASL_GE_map_GM_subjs = nanmedian(all_BOLDGM_CVRASL_GE_map_GM_subjs,4);
+        %ratio CVRBOLD/CVRASL
+        CVRratioBOLDASL_petCO2_GE_GM = petCO2_CVRBOLD_GE_map_GM./petCO2_CVRASL_GE_map_GM;
+        CVRratioBOLDASL_BOLDGM_GE_GM = BOLDGM_CVRBOLD_GE_map_GM./BOLDGM_CVRASL_GE_map_GM;
 
-%SE
-all_petCO2_CVRBOLD_SE_map_GM_subjs = cat(4,petCO2_CVRBOLD_SE_map_GM_subjs{:});
-median_petCO2_CVRBOLD_SE_map_GM_subjs = nanmedian(all_petCO2_CVRBOLD_SE_map_GM_subjs,4);
+        CVRratioBOLDASL_petCO2_SE_GM = petCO2_CVRBOLD_SE_map_GM./petCO2_CVRASL_SE_map_GM;
+        CVRratioBOLDASL_BOLDGM_SE_GM = BOLDGM_CVRBOLD_SE_map_GM./BOLDGM_CVRASL_SE_map_GM;
 
-all_petCO2_CVRASL_SE_map_GM_subjs = cat(4,petCO2_CVRASL_SE_map_GM_subjs{:});
-median_petCO2_CVRASL_SE_map_GM_subjs = nanmedian(all_petCO2_CVRASL_SE_map_GM_subjs,4);
+        %ratio CVRBOLD_SE/CVRBOLD_GE
+        CVRratioBOLDBOLD_petCO2_GM = petCO2_CVRBOLD_SE_map_GM./petCO2_CVRBOLD_GE_map_GM;
+        CVRratioBOLDBOLD_BOLDGM_GM = BOLDGM_CVRBOLD_SE_map_GM./BOLDGM_CVRBOLD_GE_map_GM;
 
-all_BOLDGM_CVRBOLD_SE_map_GM_subjs = cat(4,BOLDGM_CVRBOLD_SE_map_GM_subjs{:});
-median_BOLDGM_CVRBOLD_SE_map_GM_subjs = nanmedian(all_BOLDGM_CVRBOLD_SE_map_GM_subjs,4);
+        %append results
 
-all_BOLDGM_CVRASL_SE_map_GM_subjs = cat(4,BOLDGM_CVRASL_SE_map_GM_subjs{:});
-median_BOLDGM_CVRASL_SE_map_GM_subjs = nanmedian(all_BOLDGM_CVRASL_SE_map_GM_subjs,4);
+        MD_map_GM_subjs{end+1} = MD_map_GM;
+        petCO2_CVRBOLD_GE_map_GM_subjs{end+1} = petCO2_CVRBOLD_GE_map_GM;
+        petCO2_CVRASL_GE_map_GM_subjs{end+1} = petCO2_CVRASL_GE_map_GM;
+        BOLDGM_CVRBOLD_GE_map_GM_subjs{end+1} = BOLDGM_CVRBOLD_GE_map_GM;
+        BOLDGM_CVRASL_GE_map_GM_subjs{end+1} = BOLDGM_CVRASL_GE_map_GM;
 
-%ratio
-all_CVRratio_petCO2_GE_subjs = cat(4,CVRratio_petCO2_GE_subjs{:});
-median_CVRratio_petCO2_GE_subjs = nanmedian(all_CVRratio_petCO2_GE_subjs,4);
+        petCO2_CVRBOLD_SE_map_GM_subjs{end+1} = petCO2_CVRBOLD_SE_map_GM;
+        petCO2_CVRASL_SE_map_GM_subjs{end+1} = petCO2_CVRASL_SE_map_GM;
+        BOLDGM_CVRBOLD_SE_map_GM_subjs{end+1} = BOLDGM_CVRBOLD_SE_map_GM;
+        BOLDGM_CVRASL_SE_map_GM_subjs{end+1}= BOLDGM_CVRASL_SE_map_GM;
 
-all_CVRratio_BOLDGM_GE_subjs = cat(4,CVRratio_BOLDGM_GE_subjs{:});
-median_CVRratio_BOLDGM_GE_subjs = nanmedian(all_CVRratio_BOLDGM_GE_subjs,4);
+        CVRratioBOLDASL_petCO2_GE_GM_subjs{end+1} = CVRratioBOLDASL_petCO2_GE_GM;
+        CVRratioBOLDASL_BOLDGM_GE_GM_subjs{end+1} = CVRratioBOLDASL_BOLDGM_GE_GM;
 
-all_CVRratio_petCO2_SE_subjs = cat(4,CVRratio_petCO2_SE_subjs{:});
-median_CVRratio_petCO2_SE_subjs = nanmedian(all_CVRratio_petCO2_SE_subjs,4);
+        CVRratioBOLDASL_petCO2_SE_GM_subjs{end+1} = CVRratioBOLDASL_petCO2_SE_GM;
+        CVRratioBOLDASL_BOLDGM_SE_GM_subjs{end+1} = CVRratioBOLDASL_BOLDGM_SE_GM;
 
-all_CVRratio_BOLDGM_SE_subjs = cat(4,CVRratio_BOLDGM_SE_subjs{:});
-median_CVRratio_BOLDGM_SE_subjs = nanmedian(all_CVRratio_BOLDGM_SE_subjs,4);
+        CVRratioBOLDBOLD_petCO2_GM_subjs{end+1} = CVRratioBOLDBOLD_petCO2_GM;
+        CVRratioBOLDBOLD_BOLDGM_GM_subjs{end+1} = CVRratioBOLDBOLD_BOLDGM_GM;
 
-%% WHOLE maps
-dim=size(median_MD_map_GM_subjs);
 
+    end
 
-%% MD
 
-all_MD_maps=cat(4,V_MD_maps{:});
-median_MD_map=nanmedian(all_MD_maps,4);
+    GM_PVE_thr_str=num2str(GM_PVE_thr);
 
-figure, 
-imagesc(rot90(median_MD_map(:,:,round(dim(3)/2))))
-title('Mean Diffusivity')
-colormap(gray)
-clim([0,0.0009])
+    %% computing medians across voxels (in the tissue of interest)
 
+    %dwi
+    all_MD_map_GM_subjs = cat(4,MD_map_GM_subjs{:});
+    median_MD_map_GM_subjs = nanmedian(all_MD_map_GM_subjs,4);
 
-%% GE signal
+    %cvr
 
-all_petCO2_CVRBOLD_GE_maps=cat(4,V_petCO2_CVRBOLD_GE_maps{:});
-median_petCO2_CVRBOLD_GE_map=nanmedian(all_petCO2_CVRBOLD_GE_maps,4);
+    %GE
+    all_petCO2_CVRBOLD_GE_map_GM_subjs = cat(4,petCO2_CVRBOLD_GE_map_GM_subjs{:});
+    median_petCO2_CVRBOLD_GE_map_GM_subjs = nanmedian(all_petCO2_CVRBOLD_GE_map_GM_subjs,4);
 
-all_BOLDGM_CVRBOLD_GE_maps=cat(4,V_BOLDGM_CVRBOLD_GE_maps{:});
-median_BOLDGM_CVRBOLD_GE_map=nanmedian(all_BOLDGM_CVRBOLD_GE_maps,4);
+    all_petCO2_CVRASL_GE_map_GM_subjs = cat(4,petCO2_CVRASL_GE_map_GM_subjs{:});
+    median_petCO2_CVRASL_GE_map_GM_subjs = nanmedian(all_petCO2_CVRASL_GE_map_GM_subjs,4);
 
-all_petCO2_CVRASL_GE_maps=cat(4,V_petCO2_CVRASL_GE_maps{:});
-median_petCO2_CVRASL_GE_map=nanmedian(all_petCO2_CVRASL_GE_maps,4);
+    all_BOLDGM_CVRBOLD_GE_map_GM_subjs = cat(4,BOLDGM_CVRBOLD_GE_map_GM_subjs{:});
+    median_BOLDGM_CVRBOLD_GE_map_GM_subjs = nanmedian(all_BOLDGM_CVRBOLD_GE_map_GM_subjs,4);
 
-all_BOLDGM_CVRASL_GE_maps=cat(4,V_BOLDGM_CVRASL_GE_maps{:});
-median_BOLDGM_CVRASL_GE_map=nanmedian(all_BOLDGM_CVRASL_GE_maps,4);
+    all_BOLDGM_CVRASL_GE_map_GM_subjs = cat(4,BOLDGM_CVRASL_GE_map_GM_subjs{:});
+    median_BOLDGM_CVRASL_GE_map_GM_subjs = nanmedian(all_BOLDGM_CVRASL_GE_map_GM_subjs,4);
 
+    %SE
+    all_petCO2_CVRBOLD_SE_map_GM_subjs = cat(4,petCO2_CVRBOLD_SE_map_GM_subjs{:});
+    median_petCO2_CVRBOLD_SE_map_GM_subjs = nanmedian(all_petCO2_CVRBOLD_SE_map_GM_subjs,4);
 
-figure, 
-ax1=subplot(2,2,1);
-imagesc(rot90(median_petCO2_CVRBOLD_GE_map(:,:,round(dim(3)/2))))
-title('CVR BOLD,regPetCO2')
-clim([0,0.003])
+    all_petCO2_CVRASL_SE_map_GM_subjs = cat(4,petCO2_CVRASL_SE_map_GM_subjs{:});
+    median_petCO2_CVRASL_SE_map_GM_subjs = nanmedian(all_petCO2_CVRASL_SE_map_GM_subjs,4);
 
-ax2=subplot(2,2,2);
-imagesc(rot90(median_BOLDGM_CVRBOLD_GE_map(:,:,round(dim(3)/2))))
-title('CVR BOLD, BOLDGM')
-clim([0,0.008])
+    all_BOLDGM_CVRBOLD_SE_map_GM_subjs = cat(4,BOLDGM_CVRBOLD_SE_map_GM_subjs{:});
+    median_BOLDGM_CVRBOLD_SE_map_GM_subjs = nanmedian(all_BOLDGM_CVRBOLD_SE_map_GM_subjs,4);
 
-ax3=subplot(2,2,3);
-imagesc(rot90(median_petCO2_CVRASL_GE_map(:,:,round(dim(3)/2))))
-title('CVR ASL,regPetCO2')
-clim([0,0.09])
+    all_BOLDGM_CVRASL_SE_map_GM_subjs = cat(4,BOLDGM_CVRASL_SE_map_GM_subjs{:});
+    median_BOLDGM_CVRASL_SE_map_GM_subjs = nanmedian(all_BOLDGM_CVRASL_SE_map_GM_subjs,4);
 
-ax4=subplot(2,2,4);
-imagesc(rot90(median_BOLDGM_CVRASL_GE_map(:,:,round(dim(3)/2))))
-title('CVR ASL, BOLDGM')
-clim([0,0.3])
+    %ratio CVRBOLD/CVRASL
+    all_CVRratioBOLDASL_petCO2_GE_GM_subjs = cat(4,CVRratioBOLDASL_petCO2_GE_GM_subjs{:});
+    median_CVRratioBOLDASL_petCO2_GE_GM_subjs = nanmedian(all_CVRratioBOLDASL_petCO2_GE_GM_subjs,4);
 
-sgtitle('CVR, Gradient Echo Signal','FontWeight','bold')
+    all_CVRratioBOLDASL_BOLDGM_GE_GM_subjs = cat(4,CVRratioBOLDASL_BOLDGM_GE_GM_subjs{:});
+    median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs = nanmedian(all_CVRratioBOLDASL_BOLDGM_GE_GM_subjs,4);
 
-%% SE signal
+    all_CVRratioBOLDASL_petCO2_SE_GM_subjs = cat(4,CVRratioBOLDASL_petCO2_SE_GM_subjs{:});
+    median_CVRratioBOLDASL_petCO2_SE_GM_subjs = nanmedian(all_CVRratioBOLDASL_petCO2_SE_GM_subjs,4);
 
-all_petCO2_CVRBOLD_SE_maps=cat(4,V_petCO2_CVRBOLD_SE_maps{:});
-median_petCO2_CVRBOLD_SE_map=nanmedian(all_petCO2_CVRBOLD_SE_maps,4);
+    all_CVRratioBOLDASL_BOLDGM_SE_GM_subjs = cat(4,CVRratioBOLDASL_BOLDGM_SE_GM_subjs{:});
+    median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs = nanmedian(all_CVRratioBOLDASL_BOLDGM_SE_GM_subjs,4);
 
-all_BOLDGM_CVRBOLD_SE_maps=cat(4,V_BOLDGM_CVRBOLD_SE_maps{:});
-median_BOLDGM_CVRBOLD_SE_map=nanmedian(all_BOLDGM_CVRBOLD_SE_maps,4);
+    %ratio CVRBOLDSE/CVRBOLDGE
+    all_CVRratioBOLDBOLD_petCO2_GM_subjs = cat(4,CVRratioBOLDBOLD_petCO2_GM_subjs{:});
+    median_CVRratioBOLDBOLD_petCO2_GM_subjs = nanmedian(all_CVRratioBOLDBOLD_petCO2_GM_subjs,4);
 
-all_petCO2_CVRASL_SE_maps=cat(4,V_petCO2_CVRASL_SE_maps{:});
-median_petCO2_CVRASL_SE_map=nanmedian(all_petCO2_CVRASL_SE_maps,4);
+    all_CVRratioBOLDBOLD_BOLDGM_GM_subjs = cat(4,CVRratioBOLDBOLD_BOLDGM_GM_subjs{:});
+    median_CVRratioBOLDBOLD_BOLDGM_GM_subjs = nanmedian(all_CVRratioBOLDBOLD_BOLDGM_GM_subjs,4);
 
-all_BOLDGM_CVRASL_SE_maps=cat(4,V_BOLDGM_CVRASL_SE_maps{:});
-median_BOLDGM_CVRASL_SE_map=nanmedian(all_BOLDGM_CVRASL_SE_maps,4);
 
+    %% WHOLE maps
+    dim=size(median_MD_map_GM_subjs);
 
-figure, 
-ax1=subplot(2,2,1);
-imagesc(rot90(median_petCO2_CVRBOLD_SE_map(:,:,round(dim(3)/2))))
-title('CVR BOLD,regPetCO2')
-clim([0,0.0015])
 
-ax2=subplot(2,2,2);
-imagesc(rot90(median_BOLDGM_CVRBOLD_SE_map(:,:,round(dim(3)/2))))
-title('CVR BOLD, BOLDGM')
-clim([0,0.004])
+    %% MD
 
-ax3=subplot(2,2,3);
-imagesc(rot90(median_petCO2_CVRASL_SE_map(:,:,round(dim(3)/2))))
-title('CVR ASL,regPetCO2')
-clim([0,0.09])
+    all_MD_maps=cat(4,V_MD_maps{:});
+    median_MD_map=nanmedian(all_MD_maps,4);
 
-ax4=subplot(2,2,4);
-imagesc(rot90(median_BOLDGM_CVRASL_SE_map(:,:,round(dim(3)/2))))
-title('CVR ASL, BOLDGM')
-clim([0,0.3])
+    figure,
+    imagesc(rot90(median_MD_map(:,:,round(dim(3)/2))))
+    title('Mean Diffusivity')
+    colormap(gray)
+    clim([0,0.0009])
 
-sgtitle('CVR, Spin Echo Signal','FontWeight','bold')
 
-%% ratio CVR_BOLD/CVR_ASL
+    %% GE signal
 
-median_CVRratio_petCO2_GE_map=median_petCO2_CVRBOLD_GE_map./median_petCO2_CVRASL_GE_map;
-median_CVRratio_BOLDGM_GE_map=median_BOLDGM_CVRBOLD_GE_map./median_BOLDGM_CVRASL_GE_map;
-median_CVRratio_petCO2_SE_map=median_petCO2_CVRBOLD_SE_map./median_petCO2_CVRASL_SE_map;
-median_CVRratio_BOLDGM_SE_map=median_BOLDGM_CVRBOLD_SE_map./median_BOLDGM_CVRASL_SE_map;
+    all_petCO2_CVRBOLD_GE_maps=cat(4,V_petCO2_CVRBOLD_GE_maps{:});
+    median_petCO2_CVRBOLD_GE_map=nanmedian(all_petCO2_CVRBOLD_GE_maps,4);
 
-figure,
-ax1 = subplot(2,2,1);
-imagesc(rot90(median_CVRratio_petCO2_GE_map(:,:,round(dim(3)/2))));
-title('regPetCO2');
-subtitle('Gradient Echo','FontWeight','bold');
-clim([0,0.08])
+    all_BOLDGM_CVRBOLD_GE_maps=cat(4,V_BOLDGM_CVRBOLD_GE_maps{:});
+    median_BOLDGM_CVRBOLD_GE_map=nanmedian(all_BOLDGM_CVRBOLD_GE_maps,4);
 
-ax2 = subplot(2,2,2);
-imagesc(rot90(median_CVRratio_BOLDGM_GE_map(:,:,round(dim(3)/2))));
-title('BOLD GM');
-subtitle('Gradient Echo','FontWeight','bold');
-clim([0,0.08])
+    all_petCO2_CVRASL_GE_maps=cat(4,V_petCO2_CVRASL_GE_maps{:});
+    median_petCO2_CVRASL_GE_map=nanmedian(all_petCO2_CVRASL_GE_maps,4);
 
-ax3 = subplot(2,2,3);
-imagesc(rot90(median_CVRratio_petCO2_SE_map(:,:,round(dim(3)/2))));
-title('Spin Echo');
-clim([0,0.04])
+    all_BOLDGM_CVRASL_GE_maps=cat(4,V_BOLDGM_CVRASL_GE_maps{:});
+    median_BOLDGM_CVRASL_GE_map=nanmedian(all_BOLDGM_CVRASL_GE_maps,4);
 
-ax4 = subplot(2,2,4);
-imagesc(rot90(median_CVRratio_BOLDGM_SE_map(:,:,round(dim(3)/2))));
-title('Spin Echo');
-clim([0,0.04])
 
-sgtitle('CVR ratio','FontWeight','bold')
+    figure,
+    ax1=subplot(2,2,1);
+    imagesc(rot90(median_petCO2_CVRBOLD_GE_map(:,:,round(dim(3)/2))))
+    title('CVR BOLD,regPetCO2')
+    clim([0,0.003])
 
+    ax2=subplot(2,2,2);
+    imagesc(rot90(median_BOLDGM_CVRBOLD_GE_map(:,:,round(dim(3)/2))))
+    title('CVR BOLD, BOLDGM')
+    clim([0,0.008])
 
+    ax3=subplot(2,2,3);
+    imagesc(rot90(median_petCO2_CVRASL_GE_map(:,:,round(dim(3)/2))))
+    title('CVR ASL,regPetCO2')
+    clim([0,0.09])
 
-%% calculate correlation coefficients (without outliers removal)
+    ax4=subplot(2,2,4);
+    imagesc(rot90(median_BOLDGM_CVRASL_GE_map(:,:,round(dim(3)/2))))
+    title('CVR ASL, BOLDGM')
+    clim([0,0.3])
 
-%cvr GE regPetCO2
-[r_MDvsCVRBOLDGEPETCO2,p_MDvsCVRBOLDGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLGEPETCO2,p_MDvsCVRASLGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:),'rows','complete');
-%cvr GE regBOLDGM
-[r_MDvsCVRBOLDGEBOLDGM,p_MDvsCVRBOLDGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLGEBOLDGM,p_MDvsCVRASLGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+    sgtitle('CVR, Gradient Echo Signal','FontWeight','bold')
 
-%cvr SE regPetCO2
-[r_MDvsCVRBOLDSEPETCO2,p_MDvsCVRBOLDSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLSEPETCO2,p_MDvsCVRASLSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:),'rows','complete');
-%cvr SE regBOLDGM
-[r_MDvsCVRBOLDSEBOLDGM,p_MDvsCVRBOLDSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLSEBOLDGM,p_MDvsCVRASLSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+    %% SE signal
 
-%cvr ratio GE regPetCO2
-[r_MDvsCVRratioGEPETCO2,p_MDvsCVRratioGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_GE_subjs(:),'rows','complete');
-%cvr ratio GE BOLDGM
-[r_MDvsCVRratioGEBOLDGM,p_MDvsCVRratioGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_GE_subjs(:),'rows','complete');
-%cvr ratio SE regPetCo2
-[r_MDvsCVRratioSEPETCO2,p_MDvsCVRratioSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_PETCO2_SE_subjs(:),'rows','complete');
-%cvr ratio SE BOLDGM
-[r_MDvsCVRratioSEBOLDGM,p_MDvsCVRratioSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_SE_subjs(:),'rows','complete');
+    all_petCO2_CVRBOLD_SE_maps=cat(4,V_petCO2_CVRBOLD_SE_maps{:});
+    median_petCO2_CVRBOLD_SE_map=nanmedian(all_petCO2_CVRBOLD_SE_maps,4);
 
+    all_BOLDGM_CVRBOLD_SE_maps=cat(4,V_BOLDGM_CVRBOLD_SE_maps{:});
+    median_BOLDGM_CVRBOLD_SE_map=nanmedian(all_BOLDGM_CVRBOLD_SE_maps,4);
 
+    all_petCO2_CVRASL_SE_maps=cat(4,V_petCO2_CVRASL_SE_maps{:});
+    median_petCO2_CVRASL_SE_map=nanmedian(all_petCO2_CVRASL_SE_maps,4);
 
-%% Remove outliers and plot resulting maps
+    all_BOLDGM_CVRASL_SE_maps=cat(4,V_BOLDGM_CVRASL_SE_maps{:});
+    median_BOLDGM_CVRASL_SE_map=nanmedian(all_BOLDGM_CVRASL_SE_maps,4);
 
-dim=size(median_MD_map_GM_subjs);
-low_prc = 5;
-high_prc = 70;
 
-%% CVR ratio CVR_BOLD/CVR_ASL
+    figure,
+    ax1=subplot(2,2,1);
+    imagesc(rot90(median_petCO2_CVRBOLD_SE_map(:,:,round(dim(3)/2))))
+    title('CVR BOLD,regPetCO2')
+    clim([0,0.0015])
 
-%CVR GE
+    ax2=subplot(2,2,2);
+    imagesc(rot90(median_BOLDGM_CVRBOLD_SE_map(:,:,round(dim(3)/2))))
+    title('CVR BOLD, BOLDGM')
+    clim([0,0.004])
 
-prcLOW_MD = prctile(median_CVRratio_petCO2_GE_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_CVRratio_petCO2_GE_subjs(:),high_prc);
-median_CVRratio_petCO2_GE_subjs(median_CVRratio_petCO2_GE_subjs<prcLOW_MD | median_CVRratio_petCO2_GE_subjs>prcHIGH_MD)=NaN;
+    ax3=subplot(2,2,3);
+    imagesc(rot90(median_petCO2_CVRASL_SE_map(:,:,round(dim(3)/2))))
+    title('CVR ASL,regPetCO2')
+    clim([0,0.09])
 
-figure,
-imagesc(rot90(median_CVRratio_petCO2_GE_subjs(:,:,round(dim(3)/2))))
-%caxis([0,0.001])
-title('CVR GE, PetCO2')
+    ax4=subplot(2,2,4);
+    imagesc(rot90(median_BOLDGM_CVRASL_SE_map(:,:,round(dim(3)/2))))
+    title('CVR ASL, BOLDGM')
+    clim([0,0.3])
 
-prcLOW_MD = prctile(median_CVRratio_BOLDGM_GE_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_CVRratio_BOLDGM_GE_subjs(:),high_prc);
-median_CVRratio_BOLDGM_GE_subjs(median_CVRratio_BOLDGM_GE_subjs<prcLOW_MD | median_CVRratio_BOLDGM_GE_subjs>prcHIGH_MD)=NaN;
+    sgtitle('CVR, Spin Echo Signal','FontWeight','bold')
 
-figure,
-imagesc(rot90(median_CVRratio_BOLDGM_GE_subjs(:,:,round(dim(3)/2))))
-%caxis([0,0.001])
-title('CVR GE, BOLDGM')
+    %% ratio CVR_BOLD/CVR_ASL
 
-% CVR SE 
+    median_CVRratioBOLDASL_petCO2_GE_map=median_petCO2_CVRBOLD_GE_map./median_petCO2_CVRASL_GE_map;
+    median_CVRratioBOLDASL_BOLDGM_GE_map=median_BOLDGM_CVRBOLD_GE_map./median_BOLDGM_CVRASL_GE_map;
+    median_CVRratioBOLDASL_petCO2_SE_map=median_petCO2_CVRBOLD_SE_map./median_petCO2_CVRASL_SE_map;
+    median_CVRratioBOLDASL_BOLDGM_SE_map=median_BOLDGM_CVRBOLD_SE_map./median_BOLDGM_CVRASL_SE_map;
 
-prcLOW_MD = prctile(median_CVRratio_petCO2_SE_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_CVRratio_petCO2_SE_subjs(:),high_prc);
-median_CVRratio_petCO2_SE_subjs(median_CVRratio_petCO2_SE_subjs<prcLOW_MD | median_CVRratio_petCO2_SE_subjs>prcHIGH_MD)=NaN;
+    figure,
+    ax1 = subplot(2,2,1);
+    imagesc(rot90(median_CVRratioBOLDASL_petCO2_GE_map(:,:,round(dim(3)/2))));
+    title('regPetCO2');
+    subtitle('Gradient Echo','FontWeight','bold');
+    clim([0,0.08])
 
-figure,
-imagesc(rot90(median_CVRratio_petCO2_SE_subjs(:,:,round(dim(3)/2))))
-%caxis([0,0.001])
-title('CVR SE, PetCO2')
+    ax2 = subplot(2,2,2);
+    imagesc(rot90(median_CVRratioBOLDASL_BOLDGM_GE_map(:,:,round(dim(3)/2))));
+    title('BOLD GM');
+    subtitle('Gradient Echo','FontWeight','bold');
+    clim([0,0.08])
 
-prcLOW_MD = prctile(median_CVRratio_BOLDGM_SE_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_CVRratio_BOLDGM_SE_subjs(:),high_prc);
-median_CVRratio_BOLDGM_SE_subjs(median_CVRratio_BOLDGM_SE_subjs<prcLOW_MD | median_CVRratio_BOLDGM_SE_subjs>prcHIGH_MD)=NaN;
+    ax3 = subplot(2,2,3);
+    imagesc(rot90(median_CVRratioBOLDASL_petCO2_SE_map(:,:,round(dim(3)/2))));
+    title('Spin Echo');
+    clim([0,0.04])
 
-figure,
-imagesc(rot90(median_CVRratio_BOLDGM_SE_subjs(:,:,round(dim(3)/2))))
-%caxis([0,0.001])
-title('CVR SE, BOLDGM')
+    ax4 = subplot(2,2,4);
+    imagesc(rot90(median_CVRratioBOLDASL_BOLDGM_SE_map(:,:,round(dim(3)/2))));
+    title('Spin Echo');
+    clim([0,0.04])
 
+    sgtitle('CVR ratio BOLDASL','FontWeight','bold')
 
+    %% ratio CVR_BOLDSE/CVR_BOLDGE
 
+    median_CVRratioBOLDBOLD_petCO2_map=median_petCO2_CVRBOLD_SE_map./median_petCO2_CVRBOLD_GE_map;
+    median_CVRratioBOLDBOLD_BOLDGM_map=median_BOLDGM_CVRBOLD_SE_map./median_BOLDGM_CVRBOLD_GE_map;
 
-%% MD
-prcLOW_MD = prctile(median_MD_map_GM_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_MD_map_GM_subjs(:),high_prc);
-median_MD_map_GM_subjs(median_MD_map_GM_subjs<prcLOW_MD | median_MD_map_GM_subjs>prcHIGH_MD)=NaN;
 
-figure,
-imagesc(rot90(median_MD_map_GM_subjs(:,:,round(dim(3)/2))))
-%caxis([0,0.001])
-title('Mean Diffusivity Map')
+    figure,
+    ax1 = subplot(1,2,1);
+    imagesc(rot90(median_CVRratioBOLDBOLD_petCO2_map(:,:,round(dim(3)/2))));
+    title('regPetCO2');
+    % subtitle('Gradient Echo','FontWeight','bold');
+    clim([0,1])
 
-%% CVR GE
+    ax2 = subplot(1,2,2);
+    imagesc(rot90(median_CVRratioBOLDBOLD_BOLDGM_map(:,:,round(dim(3)/2))));
+    title('BOLD GM');
+    % subtitle('Gradient Echo','FontWeight','bold');
+    clim([0,1])
 
-prcLOW = prctile(median_petCO2_CVRBOLD_GE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_petCO2_CVRBOLD_GE_map_GM_subjs(:),high_prc);
-median_petCO2_CVRBOLD_GE_map_GM_subjs(median_petCO2_CVRBOLD_GE_map_GM_subjs<prcLOW | median_petCO2_CVRBOLD_GE_map_GM_subjs>prcHIGH)=NaN;
+    sgtitle('CVR ratio BOLDSE/BOLDGE','FontWeight','bold')
 
-figure,
-imagesc(rot90(median_petCO2_CVRBOLD_GE_map_GM_subjs(:,:,round(dim(3)/2))))
-title('CVR GE BOLD, regPETCO2')
 
 
-prcLOW = prctile(median_petCO2_CVRASL_GE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_petCO2_CVRASL_GE_map_GM_subjs(:),high_prc);
-median_petCO2_CVRASL_GE_map_GM_subjs(median_petCO2_CVRASL_GE_map_GM_subjs<prcLOW | median_petCO2_CVRASL_GE_map_GM_subjs>prcHIGH)=NaN;
 
-figure,
-imagesc(rot90(median_petCO2_CVRASL_GE_map_GM_subjs(:,:,round(dim(3)/2))))
-title('CVR GE ASL, regPETCO2')
+    %% calculate correlation coefficients in the tissue of interest (without outliers removal)
 
-prcLOW = prctile(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),high_prc);
-median_BOLDGM_CVRBOLD_GE_map_GM_subjs(median_BOLDGM_CVRBOLD_GE_map_GM_subjs<prcLOW | median_BOLDGM_CVRBOLD_GE_map_GM_subjs>prcHIGH)=NaN;
+    %cvr GE regPetCO2
+    [r_MDvsCVRBOLDGEPETCO2,p_MDvsCVRBOLDGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRASLGEPETCO2,p_MDvsCVRASLGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+    %cvr GE regBOLDGM
+    [r_MDvsCVRBOLDGEBOLDGM,p_MDvsCVRBOLDGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRASLGEBOLDGM,p_MDvsCVRASLGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:),'rows','complete');
 
-figure,
-imagesc(rot90(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:,:,round(dim(3)/2))))
-title('CVR GE BOLD, regBOLD')
+    %cvr SE regPetCO2
+    [r_MDvsCVRBOLDSEPETCO2,p_MDvsCVRBOLDSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRASLSEPETCO2,p_MDvsCVRASLSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+    %cvr SE regBOLDGM
+    [r_MDvsCVRBOLDSEBOLDGM,p_MDvsCVRBOLDSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRASLSEBOLDGM,p_MDvsCVRASLSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:),'rows','complete');
 
-prcLOW = prctile(median_BOLDGM_CVRASL_GE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_BOLDGM_CVRASL_GE_map_GM_subjs(:),high_prc);
-median_BOLDGM_CVRASL_GE_map_GM_subjs(median_BOLDGM_CVRASL_GE_map_GM_subjs<prcLOW | median_BOLDGM_CVRASL_GE_map_GM_subjs>prcHIGH)=NaN;
+    %cvr ratio GE regPetCO2
+    [r_MDvsCVRratioBOLDASL_GEPETCO2,p_MDvsCVRratioBOLDASL_GEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDASL_petCO2_GE_GM_subjs(:),'rows','complete');
+    %cvr ratio GE BOLDGM
+    [r_MDvsCVRratioBOLDASL_GEBOLDGM,p_MDvsCVRratioBOLDASL_GEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs(:),'rows','complete');
+    %cvr ratio SE regPetCo2
+    [r_MDvsCVRratioBOLDASL_SEPETCO2,p_MDvsCVRratioBOLDASL_SEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDASL_petCO2_SE_GM_subjs(:),'rows','complete');
+    %cvr ratio SE BOLDGM
+    [r_MDvsCVRratioBOLDASL_SEBOLDGM,p_MDvsCVRratioBOLDASL_SEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs(:),'rows','complete');
 
-figure,
-imagesc(rot90(median_BOLDGM_CVRASL_GE_map_GM_subjs(:,:,round(dim(3)/2))))
-title('CVR GE ASL, regBOLD')
+    %cvr BOLDGE/BOLDSE
+    [r_MDvsCVRratioBOLDBOLD_petCO2,p_MDvsCVRratioBOLDBOLD_petCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDBOLD_petCO2_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRratioBOLDBOLD_BOLDGM,p_MDvsCVRratioBOLDBOLD_BOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDBOLD_BOLDGM_GM_subjs(:),'rows','complete');
 
-%% CVR SE
 
-prcLOW = prctile(median_petCO2_CVRBOLD_SE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_petCO2_CVRBOLD_SE_map_GM_subjs(:),high_prc);
-median_petCO2_CVRBOLD_SE_map_GM_subjs(median_petCO2_CVRBOLD_SE_map_GM_subjs<prcLOW | median_petCO2_CVRBOLD_SE_map_GM_subjs>prcHIGH)=NaN;
 
-figure,
-imagesc(rot90(median_petCO2_CVRBOLD_SE_map_GM_subjs(:,:,round(dim(3)/2))))
-title('CVR SE BOLD, regPETCO2')
+    %% Remove outliers and plot resulting maps
 
-prcLOW = prctile(median_petCO2_CVRASL_SE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_petCO2_CVRASL_SE_map_GM_subjs(:),high_prc);
-median_petCO2_CVRASL_SE_map_GM_subjs(median_petCO2_CVRASL_SE_map_GM_subjs<prcLOW | median_petCO2_CVRASL_SE_map_GM_subjs>prcHIGH)=NaN;
+    dim=size(median_MD_map_GM_subjs);
+    low_prc = 5;
+    high_prc = 95;
 
-figure,
-imagesc(rot90(median_petCO2_CVRASL_SE_map_GM_subjs(:,:,round(dim(3)/2))))
-title('CVR SE ASL, regPETCO2')
+    %% CVR ratio CVR_BOLDSE/CVR_BOLDGE
 
-prcLOW = prctile(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),high_prc);
-median_BOLDGM_CVRBOLD_SE_map_GM_subjs(median_BOLDGM_CVRBOLD_SE_map_GM_subjs<prcLOW | median_BOLDGM_CVRBOLD_SE_map_GM_subjs>prcHIGH)=NaN;
+    % %petCO2
 
-figure,
-imagesc(rot90(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:,:,round(dim(3)/2))))
-title('CVR SE BOLD, regBOLD')
+    prcLOW_MD = prctile(median_CVRratioBOLDBOLD_petCO2_GM_subjs(:),low_prc);
+    prcHIGH_MD = prctile(median_CVRratioBOLDBOLD_petCO2_GM_subjs(:),high_prc);
+    median_CVRratioBOLDBOLD_petCO2_GM_subjs(median_CVRratioBOLDBOLD_petCO2_GM_subjs<prcLOW_MD | median_CVRratioBOLDBOLD_petCO2_GM_subjs>prcHIGH_MD)=NaN;
 
-prcLOW = prctile(median_BOLDGM_CVRASL_SE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_BOLDGM_CVRASL_SE_map_GM_subjs(:),high_prc);
-median_BOLDGM_CVRASL_SE_map_GM_subjs(median_BOLDGM_CVRASL_SE_map_GM_subjs<prcLOW | median_BOLDGM_CVRASL_SE_map_GM_subjs>prcHIGH)=NaN;
+    % figure,
+    % imagesc(rot90(median_CVRratioBOLDBOLD_petCO2_GM_subjs(:,:,round(dim(3)/2))))
+    % %caxis([0,0.001])
+    % title('CVRratioBOLDBOLD, PetCO2')
 
-figure,
-imagesc(rot90(median_BOLDGM_CVRASL_SE_map_GM_subjs(:,:,round(dim(3)/2))))
-title('CVR SE ASL, regBOLD')
+    % % BOLDGM
 
-%% calculate correlation coefficients (after outliers removal)
+    prcLOW_MD = prctile(median_CVRratioBOLDBOLD_BOLDGM_GM_subjs(:),low_prc);
+    prcHIGH_MD = prctile(median_CVRratioBOLDBOLD_BOLDGM_GM_subjs(:),high_prc);
+    median_CVRratioBOLDBOLD_BOLDGM_GM_subjs(median_CVRratioBOLDBOLD_BOLDGM_GM_subjs<prcLOW_MD | median_CVRratioBOLDBOLD_BOLDGM_GM_subjs>prcHIGH_MD)=NaN;
 
-%cvr GE regPetCO2
-[r_MDvsCVRBOLDGEPETCO2,p_MDvsCVRBOLDGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLGEPETCO2,p_MDvsCVRASLGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:),'rows','complete');
-%cvr GE regBOLDGM
-[r_MDvsCVRBOLDGEBOLDGM,p_MDvsCVRBOLDGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLGEBOLDGM,p_MDvsCVRASLGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+    % figure,
+    % imagesc(rot90(median_CVRratioBOLDBOLD_BOLDGM_GM_subjs(:,:,round(dim(3)/2))))
+    % %caxis([0,0.001])
+    % title('CVRratioBOLDBOLD, BOLDGM')
 
-%cvr SE regPetCO2
-[r_MDvsCVRBOLDSEPETCO2,p_MDvsCVRBOLDSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLSEPETCO2,p_MDvsCVRASLSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:),'rows','complete');
-%cvr SE regBOLDGM
-[r_MDvsCVRBOLDSEBOLDGM,p_MDvsCVRBOLDSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLSEBOLDGM,p_MDvsCVRASLSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+    %% CVR ratio CVR_BOLD/CVR_ASL
 
-%cvr ratio GE regPetCO2
-[r_MDvsCVRratioGEPETCO2,p_MDvsCVRratioGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_GE_subjs(:),'rows','complete');
-%cvr ratio GE BOLDGM
-[r_MDvsCVRratioGEBOLDGM,p_MDvsCVRratioGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_GE_subjs(:),'rows','complete');
-%cvr ratio SE regPetCo2
-[r_MDvsCVRratioSEPETCO2,p_MDvsCVRratioSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_SE_subjs(:),'rows','complete');
-%cvr ratio SE BOLDGM
-[r_MDvsCVRratioSEBOLDGM,p_MDvsCVRratioSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_SE_subjs(:),'rows','complete');
+    % %CVR GE
+
+    prcLOW_MD = prctile(median_CVRratioBOLDASL_petCO2_GE_GM_subjs(:),low_prc);
+    prcHIGH_MD = prctile(median_CVRratioBOLDASL_petCO2_GE_GM_subjs(:),high_prc);
+    median_CVRratioBOLDASL_petCO2_GE_GM_subjs(median_CVRratioBOLDASL_petCO2_GE_GM_subjs<prcLOW_MD | median_CVRratioBOLDASL_petCO2_GE_GM_subjs>prcHIGH_MD)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_CVRratio_petCO2_GE_subjs(:,:,round(dim(3)/2))))
+    % %caxis([0,0.001])
+    % title('CVR GE, PetCO2')
+
+    prcLOW_MD = prctile(median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs(:),low_prc);
+    prcHIGH_MD = prctile(median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs(:),high_prc);
+    median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs(median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs<prcLOW_MD | median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs>prcHIGH_MD)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_CVRratio_BOLDGM_GE_subjs(:,:,round(dim(3)/2))))
+    % %caxis([0,0.001])
+    % title('CVR GE, BOLDGM')
+
+    % % CVR SE
+
+    prcLOW_MD = prctile(median_CVRratioBOLDASL_petCO2_SE_GM_subjs(:),low_prc);
+    prcHIGH_MD = prctile(median_CVRratioBOLDASL_petCO2_SE_GM_subjs(:),high_prc);
+    median_CVRratioBOLDASL_petCO2_SE_GM_subjs(median_CVRratioBOLDASL_petCO2_SE_GM_subjs<prcLOW_MD | median_CVRratioBOLDASL_petCO2_SE_GM_subjs>prcHIGH_MD)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_CVRratio_petCO2_SE_subjs(:,:,round(dim(3)/2))))
+    % %caxis([0,0.001])
+    % title('CVR SE, PetCO2')
+
+    prcLOW_MD = prctile(median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs(:),low_prc);
+    prcHIGH_MD = prctile(median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs(:),high_prc);
+    median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs(median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs<prcLOW_MD | median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs>prcHIGH_MD)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_CVRratio_BOLDGM_SE_subjs(:,:,round(dim(3)/2))))
+    % %caxis([0,0.001])
+    % title('CVR SE, BOLDGM')
+
+
+
+
+    %% MD
+    prcLOW_MD = prctile(median_MD_map_GM_subjs(:),low_prc);
+    prcHIGH_MD = prctile(median_MD_map_GM_subjs(:),high_prc);
+    median_MD_map_GM_subjs(median_MD_map_GM_subjs<prcLOW_MD | median_MD_map_GM_subjs>prcHIGH_MD)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_MD_map_GM_subjs(:,:,round(dim(3)/2))))
+    % %caxis([0,0.001])
+    % title('Mean Diffusivity Map')
+
+    %% CVR GE
+
+    prcLOW = prctile(median_petCO2_CVRBOLD_GE_map_GM_subjs(:),low_prc);
+    prcHIGH = prctile(median_petCO2_CVRBOLD_GE_map_GM_subjs(:),high_prc);
+    median_petCO2_CVRBOLD_GE_map_GM_subjs(median_petCO2_CVRBOLD_GE_map_GM_subjs<prcLOW | median_petCO2_CVRBOLD_GE_map_GM_subjs>prcHIGH)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_petCO2_CVRBOLD_GE_map_GM_subjs(:,:,round(dim(3)/2))))
+    % title('CVR GE BOLD, regPETCO2')
+
+
+    prcLOW = prctile(median_petCO2_CVRASL_GE_map_GM_subjs(:),low_prc);
+    prcHIGH = prctile(median_petCO2_CVRASL_GE_map_GM_subjs(:),high_prc);
+    median_petCO2_CVRASL_GE_map_GM_subjs(median_petCO2_CVRASL_GE_map_GM_subjs<prcLOW | median_petCO2_CVRASL_GE_map_GM_subjs>prcHIGH)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_petCO2_CVRASL_GE_map_GM_subjs(:,:,round(dim(3)/2))))
+    % title('CVR GE ASL, regPETCO2')
+
+    prcLOW = prctile(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),low_prc);
+    prcHIGH = prctile(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),high_prc);
+    median_BOLDGM_CVRBOLD_GE_map_GM_subjs(median_BOLDGM_CVRBOLD_GE_map_GM_subjs<prcLOW | median_BOLDGM_CVRBOLD_GE_map_GM_subjs>prcHIGH)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:,:,round(dim(3)/2))))
+    % title('CVR GE BOLD, regBOLD')
+
+    prcLOW = prctile(median_BOLDGM_CVRASL_GE_map_GM_subjs(:),low_prc);
+    prcHIGH = prctile(median_BOLDGM_CVRASL_GE_map_GM_subjs(:),high_prc);
+    median_BOLDGM_CVRASL_GE_map_GM_subjs(median_BOLDGM_CVRASL_GE_map_GM_subjs<prcLOW | median_BOLDGM_CVRASL_GE_map_GM_subjs>prcHIGH)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_BOLDGM_CVRASL_GE_map_GM_subjs(:,:,round(dim(3)/2))))
+    % title('CVR GE ASL, regBOLD')
+
+    %% CVR SE
+
+    prcLOW = prctile(median_petCO2_CVRBOLD_SE_map_GM_subjs(:),low_prc);
+    prcHIGH = prctile(median_petCO2_CVRBOLD_SE_map_GM_subjs(:),high_prc);
+    median_petCO2_CVRBOLD_SE_map_GM_subjs(median_petCO2_CVRBOLD_SE_map_GM_subjs<prcLOW | median_petCO2_CVRBOLD_SE_map_GM_subjs>prcHIGH)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_petCO2_CVRBOLD_SE_map_GM_subjs(:,:,round(dim(3)/2))))
+    % title('CVR SE BOLD, regPETCO2')
+
+    prcLOW = prctile(median_petCO2_CVRASL_SE_map_GM_subjs(:),low_prc);
+    prcHIGH = prctile(median_petCO2_CVRASL_SE_map_GM_subjs(:),high_prc);
+    median_petCO2_CVRASL_SE_map_GM_subjs(median_petCO2_CVRASL_SE_map_GM_subjs<prcLOW | median_petCO2_CVRASL_SE_map_GM_subjs>prcHIGH)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_petCO2_CVRASL_SE_map_GM_subjs(:,:,round(dim(3)/2))))
+    % title('CVR SE ASL, regPETCO2')
+
+    prcLOW = prctile(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),low_prc);
+    prcHIGH = prctile(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),high_prc);
+    median_BOLDGM_CVRBOLD_SE_map_GM_subjs(median_BOLDGM_CVRBOLD_SE_map_GM_subjs<prcLOW | median_BOLDGM_CVRBOLD_SE_map_GM_subjs>prcHIGH)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:,:,round(dim(3)/2))))
+    % title('CVR SE BOLD, regBOLD')
+
+    prcLOW = prctile(median_BOLDGM_CVRASL_SE_map_GM_subjs(:),low_prc);
+    prcHIGH = prctile(median_BOLDGM_CVRASL_SE_map_GM_subjs(:),high_prc);
+    median_BOLDGM_CVRASL_SE_map_GM_subjs(median_BOLDGM_CVRASL_SE_map_GM_subjs<prcLOW | median_BOLDGM_CVRASL_SE_map_GM_subjs>prcHIGH)=NaN;
+
+    % figure,
+    % imagesc(rot90(median_BOLDGM_CVRASL_SE_map_GM_subjs(:,:,round(dim(3)/2))))
+    % title('CVR SE ASL, regBOLD')
+
+    %% calculate correlation coefficients in the tissue of interest (after outliers removal)
+
+    %cvr GE regPetCO2
+    [r_MDvsCVRBOLDGEPETCO2,p_MDvsCVRBOLDGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRASLGEPETCO2,p_MDvsCVRASLGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+    %cvr GE regBOLDGM
+    [r_MDvsCVRBOLDGEBOLDGM,p_MDvsCVRBOLDGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRASLGEBOLDGM,p_MDvsCVRASLGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+
+    %cvr SE regPetCO2
+    [r_MDvsCVRBOLDSEPETCO2,p_MDvsCVRBOLDSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRASLSEPETCO2,p_MDvsCVRASLSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+    %cvr SE regBOLDGM
+    [r_MDvsCVRBOLDSEBOLDGM,p_MDvsCVRBOLDSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
+    [r_MDvsCVRASLSEBOLDGM,p_MDvsCVRASLSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+
+    %cvr ratio GE regPetCO2
+    [r_MDvsCVRratioBOLDASL_GEPETCO2,p_MDvsCVRratioBOLDASL_GEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDASL_petCO2_GE_GM_subjs(:),'rows','complete');
+    %cvr ratio GE BOLDGM
+    [r_MDvsCVRratioBOLDASL_GEBOLDGM,p_MDvsCVRratioBOLDASL_GEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs(:),'rows','complete');
+    %cvr ratio SE regPetCo2
+    [r_MDvsCVRratioBOLDASL_SEPETCO2,p_MDvsCVRratioBOLDASL_SEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDASL_petCO2_SE_GM_subjs(:),'rows','complete');
+    %cvr ratio SE BOLDGM
+    [r_MDvsCVRratioBOLDASL_SEBOLDGM,p_MDvsCVRratioBOLDASL_SEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs(:),'rows','complete');
+
+    %cvr ratio regPetCo2
+    [r_MDvsCVRratioBOLDBOLD_petCO2,p_MDvsCVRratioBOLDBOLD_petCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDBOLD_petCO2_GM_subjs(:),'rows','complete');
+    %cvr ratio regBOLDGM
+    [r_MDvsCVRratioBOLDBOLD_BOLDGM,p_MDvsCVRratioBOLDBOLD_BOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratioBOLDBOLD_BOLDGM_GM_subjs(:),'rows','complete');
 
 %% distributions
 
+%% ratio CVR_BOLDSE/CVR_BOLDGE
+
+    figure,
+    ax1=subplot(1,2,1);
+    histogram(median_CVRratioBOLDBOLD_petCO2_GM_subjs)
+    title('regPetCO2','FontWeight','bold')
+
+
+    ax2=subplot(1,2,2);
+    histogram(median_CVRratioBOLDBOLD_BOLDGM_GM_subjs)
+    title('regBOLDGM','FontWeight','bold')
+
+    sgtitle(strcat('CVR ratio BOLDSE/BOLDGE distributions, GM PVE thr=',GM_PVE_thr_str),'FontWeight','bold')
+
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/CVRratioBOLDSEBOLDGE_dist_GM_PVE_thr',GM_PVE_thr_str,'.png'))
+
 %% ratio CVR_BOLD/CVR_ASL
 
-figure,
-ax1=subplot(2,2,1);
-histogram(median_CVRratio_petCO2_GE_subjs)
-title('CVR GE, regPetCO2','FontWeight','bold')
+    figure;
+    ax1=subplot(2,2,1);
+    histogram(median_CVRratioBOLDASL_petCO2_GE_GM_subjs)
+    title('CVR GE, regPetCO2','FontWeight','bold')
 
 
-ax2=subplot(2,2,2);
-histogram(median_CVRratio_BOLDGM_GE_subjs)
-title('CVR GE, regBOLDGM','FontWeight','bold')
+    ax2=subplot(2,2,2);
+    histogram(median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs)
+    title('CVR GE, regBOLDGM','FontWeight','bold')
 
-ax3=subplot(2,2,3);
-histogram(median_CVRratio_petCO2_SE_subjs)
-title('CVR SE, regPetCO2','FontWeight','bold')
+    ax3=subplot(2,2,3);
+    histogram(median_CVRratioBOLDASL_petCO2_SE_GM_subjs)
+    title('CVR SE, regPetCO2','FontWeight','bold')
 
 
-ax4=subplot(2,2,4);
-histogram(median_CVRratio_BOLDGM_SE_subjs)
-title('CVR SE, regBOLDGM','FontWeight','bold')
+    ax4=subplot(2,2,4);
+    histogram(median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs)
+    title('CVR SE, regBOLDGM','FontWeight','bold')
 
-sgtitle('CVR ratio distributions','FontWeight','bold')
+    sgtitle(strcat('CVR ratio BOLDASL distributions, GM PVE thr=',GM_PVE_thr_str),'FontWeight','bold')
+
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/CVRratioBOLDASL_dist_GM_PVE_thr',GM_PVE_thr_str,'.png'))
+
 %% MD
 
-figure,
-histogram(median_MD_map_GM_subjs)
-title('Mean Diffusivity')
+    figure,
+    histogram(median_MD_map_GM_subjs)
+    title(strcat('Mean Diffusivity, GM PVE thr=',GM_PVE_thr_str))
+
+    savefig(figure,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/MD_dist_GM_PVE_thr',GM_PVE_thr_str,'.fig'))
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/MD_dist_GM_PVE_thr',GM_PVE_thr_str,'.png'))
 
 %% GE signal
 
-figure,
-ax1=subplot(2,2,1);
-histogram(median_petCO2_CVRBOLD_GE_map_GM_subjs)
-title('CVR GE BOLD, regPetCO2','FontWeight','bold')
+    figure,
+    ax1=subplot(2,2,1);
+    histogram(median_petCO2_CVRBOLD_GE_map_GM_subjs)
+    title('CVR GE BOLD, regPetCO2','FontWeight','bold')
 
 
-ax2=subplot(2,2,2);
-histogram(median_BOLDGM_CVRBOLD_GE_map_GM_subjs)
-title('CVR GE BOLD, regBOLDGM','FontWeight','bold')
+    ax2=subplot(2,2,2);
+    histogram(median_BOLDGM_CVRBOLD_GE_map_GM_subjs)
+    title('CVR GE BOLD, regBOLDGM','FontWeight','bold')
 
-ax3=subplot(2,2,3);
-histogram(median_petCO2_CVRASL_GE_map_GM_subjs)
-title('CVR GE ASL, regPetCO2','FontWeight','bold')
-
-
-ax4=subplot(2,2,4);
-histogram(median_BOLDGM_CVRASL_GE_map_GM_subjs)
-title('CVR GE ASL, regBOLDGM','FontWeight','bold')
-
-%% SE signal
-
-figure,
-ax1=subplot(2,2,1);
-histogram(median_petCO2_CVRBOLD_SE_map_GM_subjs)
-title('CVR SE BOLD, regPetCO2','FontWeight','bold')
+    ax3=subplot(2,2,3);
+    histogram(median_petCO2_CVRASL_GE_map_GM_subjs)
+    title('CVR GE ASL, regPetCO2','FontWeight','bold')
 
 
-ax2=subplot(2,2,2);
-histogram(median_BOLDGM_CVRBOLD_SE_map_GM_subjs)
-title('CVR SE BOLD, regBOLDGM','FontWeight','bold')
+    ax4=subplot(2,2,4);
+    histogram(median_BOLDGM_CVRASL_GE_map_GM_subjs)
+    title('CVR GE ASL, regBOLDGM','FontWeight','bold')
 
-ax3=subplot(2,2,3);
-histogram(median_petCO2_CVRASL_SE_map_GM_subjs)
-title('CVR SE ASL, regPetCO2','FontWeight','bold')
+    sgtitle(strcat('CVR GE distributions, GM PVE thr=',GM_PVE_thr_str),'FontWeight','bold')
+
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/CVRGE_dist_GM_PVE_thr',GM_PVE_thr_str,'.png'))
 
 
-ax4=subplot(2,2,4);
-histogram(median_BOLDGM_CVRASL_SE_map_GM_subjs)
-title('CVR SE ASL, regBOLDGM','FontWeight','bold')
+%%  SE signal
 
-%% Correlation barplot (after outliers removal)
+    figure,
+    ax1=subplot(2,2,1);
+    histogram(median_petCO2_CVRBOLD_SE_map_GM_subjs)
+    title('CVR SE BOLD, regPetCO2','FontWeight','bold')
 
-corr_coefficients = cat(1,r_MDvsCVRBOLDGEBOLDGM(1,2),r_MDvsCVRASLGEBOLDGM(1,2),r_MDvsCVRBOLDGEPETCO2(1,2),r_MDvsCVRASLGEPETCO2(1,2),r_MDvsCVRBOLDSEBOLDGM(1,2),r_MDvsCVRASLSEBOLDGM(1,2),r_MDvsCVRBOLDSEPETCO2(1,2),r_MDvsCVRASLSEPETCO2(1,2));
 
-figure,
-bar(corr_coefficients)
-ylabel('correlation coefficient value','FontWeight','bold')
-ylim([-0.1,0.3])
-title('CVR versus Mean Diffusivity')
-xticklabels({'CVRBOLD GE BOLDGM','CVRASL GE BOLDGM','CVRBOLD GE PETCO2','CVRASL GE PETCO2','CVRBOLD SE BOLDGM','CVRASL SE BOLDGM','CVRBOLD SE PETCO2','CVRASL SE PETCO2'});
-grid on
+    ax2=subplot(2,2,2);
+    histogram(median_BOLDGM_CVRBOLD_SE_map_GM_subjs)
+    title('CVR SE BOLD, regBOLDGM','FontWeight','bold')
 
-%% ratio CVR_BOLD/CVR_ASL
+    ax3=subplot(2,2,3);
+    histogram(median_petCO2_CVRASL_SE_map_GM_subjs)
+    title('CVR SE ASL, regPetCO2','FontWeight','bold')
 
-corr_coefficients = cat(1,r_MDvsCVRratioGEPETCO2(1,2),r_MDvsCVRratioGEBOLDGM(1,2),r_MDvsCVRratioSEPETCO2(1,2),r_MDvsCVRratioSEBOLDGM(1,2));
 
-figure,
-bar(corr_coefficients)
-ylabel('correlation coefficient value','FontWeight','bold')
-title('CVR versus Mean Diffusivity')
-xticklabels({'CVRratio GE PETCO2','CVRratio GE BOLDGM','CVRratio SE PETCO2','CVRratio SE BOLDGM'});
-grid on
+    ax4=subplot(2,2,4);
+    histogram(median_BOLDGM_CVRASL_SE_map_GM_subjs)
+    title('CVR SE ASL, regBOLDGM','FontWeight','bold')
+
+    sgtitle(strcat('CVR SE distributions, GM PVE thr=',GM_PVE_thr_str),'FontWeight','bold')
+
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/CVRSE_dist_GM_PVE_thr',GM_PVE_thr_str,'.png'))
+
+
+ %% Correlation barplot in the tissue of interest (after outliers removal)
+
+    corr_coefficients = cat(1,r_MDvsCVRBOLDGEBOLDGM(1,2),r_MDvsCVRASLGEBOLDGM(1,2),r_MDvsCVRBOLDGEPETCO2(1,2),r_MDvsCVRASLGEPETCO2(1,2),r_MDvsCVRBOLDSEBOLDGM(1,2),r_MDvsCVRASLSEBOLDGM(1,2),r_MDvsCVRBOLDSEPETCO2(1,2),r_MDvsCVRASLSEPETCO2(1,2));
+
+    figure,
+    fig=bar(corr_coefficients);
+    ylabel('correlation coefficient value','FontWeight','bold');
+    ylim([-0.1,0.3]);
+    title(strcat('CVR versus Mean Diffusivity, GM PVE thr=',GM_PVE_thr_str),'FontWeight','bold')
+    xticklabels({'CVRBOLD GE BOLDGM','CVRASL GE BOLDGM','CVRBOLD GE PETCO2','CVRASL GE PETCO2','CVRBOLD SE BOLDGM','CVRASL SE BOLDGM','CVRBOLD SE PETCO2','CVRASL SE PETCO2'});
+    grid on
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/corr_MDvsCVR_GMthr',GM_PVE_thr_str,'.png'))
+
+    %% Correlation barplot in the tissue of interest (after outliers removal)
+
+    corr_coefficients = cat(1, r_MDvsCVRBOLDGEPETCO2(1,2),r_MDvsCVRBOLDSEPETCO2(1,2));
+
+    figure,
+    fig=bar(corr_coefficients);
+    ylabel('correlation coefficient value','FontWeight','bold');
+    ylim([-0.1,0.3]);
+    title(strcat('CVR versus Mean Diffusivity, GM PVE thr=',GM_PVE_thr_str),'FontWeight','bold')
+    xticklabels({'CVR_{BOLD} Gradient Echo','CVR_{BOLD} Spin Echo'});
+    xtickangle(45)
+    grid on
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/corr_MDvsCVRBOLDPETCO2_GMthr',GM_PVE_thr_str,'.png'))
+    
+    %% ratio CVR_BOLDSE/CVR_BOLDGE
+
+    corr_coefficients = cat(1,r_MDvsCVRratioBOLDBOLD_petCO2(1,2),r_MDvsCVRratioBOLDBOLD_BOLDGM(1,2));
+
+    figure,
+    fig=bar(corr_coefficients);
+    ylabel('correlation coefficient value','FontWeight','bold')
+    title(strcat('CVRratioBOLDSE/BOLDGE versus Mean Diffusivity, GM PVE thr=',GM_PVE_thr_str),'FontWeight','bold')
+    xticklabels({'CVRratioBOLDSE/BOLDGE PETCO2','CVRratioBOLDSE/BOLDGE BOLDGM'});
+    grid on
+
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/corr_MDvsCVRratioBOLDBOLD_GMthr',GM_PVE_thr_str,'.png'))
+
+
+
+    %% ratio CVR_BOLD/CVR_ASL
+
+    corr_coefficients = cat(1,r_MDvsCVRratioBOLDASL_GEPETCO2(1,2),r_MDvsCVRratioBOLDASL_GEBOLDGM(1,2),r_MDvsCVRratioBOLDASL_SEPETCO2(1,2),r_MDvsCVRratioBOLDASL_SEBOLDGM(1,2));
+
+    figure,
+    bar(corr_coefficients)
+    ylabel('correlation coefficient value','FontWeight','bold')
+    title(strcat('CVRratioBOLDASL versus Mean Diffusivity,GM PVE thr=',GM_PVE_thr_str),'FontWeight','bold')
+    xticklabels({'CVRratioBOLDASL GE PETCO2','CVRratioBOLDASL GE BOLDGM','CVRratioBOLDASL SE PETCO2','CVRratioBOLDASL SE BOLDGM'});
+    grid on
+
+
+    exportgraphics(gca,strcat('/home/c25078236/Desktop/DEXIGESE/Results_260226/plots_changing_thrs/corr_MDvsCVRratioBOLDASL_GMthr',GM_PVE_thr_str,'.png'))
+
+    disp(strcat('Plots saved for GM PVE thr',GM_PVE_thr_str))
+end
 
 
 %% scatterplots MD vs CVR GE
 
-figure,
-scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:))
-xlabel('Mean Diffusivity map','FontWeight','bold')
-ylabel('CVR GE BOLD, regPetCO2','FontWeight','bold')
-
-figure,
-scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:))
-xlabel('Mean Diffusivity map','FontWeight','bold')
-ylabel('CVR GE ASL, regPetCO2','FontWeight','bold')
-
-figure,
-scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:))
-xlabel('Mean Diffusivity map','FontWeight','bold')
-ylabel('CVR GE BOLD, regBOLDGM','FontWeight','bold')
-
-figure,
-scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:))
-xlabel('Mean Diffusivity map','FontWeight','bold')
-ylabel('CVR GE ASL, regBOLDGM','FontWeight','bold')
+% figure,
+% scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:))
+% xlabel('Mean Diffusivity map','FontWeight','bold')
+% ylabel('CVR GE BOLD, regPetCO2','FontWeight','bold')
+% 
+% figure,
+% scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:))
+% xlabel('Mean Diffusivity map','FontWeight','bold')
+% ylabel('CVR GE ASL, regPetCO2','FontWeight','bold')
+% 
+% figure,
+% scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:))
+% xlabel('Mean Diffusivity map','FontWeight','bold')
+% ylabel('CVR GE BOLD, regBOLDGM','FontWeight','bold')
+% 
+% figure,
+% scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:))
+% xlabel('Mean Diffusivity map','FontWeight','bold')
+% ylabel('CVR GE ASL, regBOLDGM','FontWeight','bold')
 
 %% histogram 2d MD vs CVR GE
 
@@ -768,26 +925,26 @@ end
 sgtitle('CVR Gradient Echo Signal vs MD','FontWeight','bold')
 
 %% scatterplots MD vs CVR SE
-%SE signal
-figure,
-scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:))
-xlabel('Mean Diffusivity map','FontWeight','bold')
-ylabel('CVR SE BOLD, regPetCO2','FontWeight','bold')
-
-figure,
-scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:))
-xlabel('Mean Diffusivity map','FontWeight','bold')
-ylabel('CVR SE ASL, regPetCO2','FontWeight','bold')
-
-figure,
-scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:))
-xlabel('Mean Diffusivity map','FontWeight','bold')
-ylabel('CVR SE BOLD, regBOLDGM','FontWeight','bold')
-
-figure,
-scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:))
-xlabel('Mean Diffusivity map','FontWeight','bold')
-ylabel('CVR SE ASL, regBOLDGM','FontWeight','bold')
+% %SE signal
+% figure,
+% scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:))
+% xlabel('Mean Diffusivity map','FontWeight','bold')
+% ylabel('CVR SE BOLD, regPetCO2','FontWeight','bold')
+% 
+% figure,
+% scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:))
+% xlabel('Mean Diffusivity map','FontWeight','bold')
+% ylabel('CVR SE ASL, regPetCO2','FontWeight','bold')
+% 
+% figure,
+% scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:))
+% xlabel('Mean Diffusivity map','FontWeight','bold')
+% ylabel('CVR SE BOLD, regBOLDGM','FontWeight','bold')
+% 
+% figure,
+% scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:))
+% xlabel('Mean Diffusivity map','FontWeight','bold')
+% ylabel('CVR SE ASL, regBOLDGM','FontWeight','bold')
 
 %% 2d histogram MD vs CVR SE
 
@@ -861,73 +1018,113 @@ sgtitle('CVR Spin Echo Signal vs MD','FontWeight','bold')
 
 %% histogram 2d ratio CVR_BOLD/CVR_ASL
 
-r_MDvsCVRratioGEPETCO2_str=num2str(round(r_MDvsCVRratioGEPETCO2(1,2),2));
-r_MDvsCVRratioGEBOLDGM_str=num2str(round(r_MDvsCVRratioGEBOLDGM(1,2),2));
-r_MDvsCVRratioSEPETCO2_str=num2str(round(r_MDvsCVRratioSEPETCO2(1,2),2));
-r_MDvsCVRratioSEBOLDGM_str=num2str(round(r_MDvsCVRratioSEBOLDGM(1,2),2));
+r_MDvsCVRratioBOLDASL_GEPETCO2_str=num2str(round(r_MDvsCVRratioBOLDASL_GEPETCO2(1,2),2));
+r_MDvsCVRratioBOLDASL_GEBOLDGM_str=num2str(round(r_MDvsCVRratioBOLDASL_GEBOLDGM(1,2),2));
+r_MDvsCVRratioBOLDASL_SEPETCO2_str=num2str(round(r_MDvsCVRratioBOLDASL_SEPETCO2(1,2),2));
+r_MDvsCVRratioBOLDASL_SEBOLDGM_str=num2str(round(r_MDvsCVRratioBOLDASL_SEBOLDGM(1,2),2));
 
 figure,
 ax1=subplot(2,2,1);
-histogram2(median_CVRratio_petCO2_GE_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_CVRratioBOLDASL_petCO2_GE_GM_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR GE','FontWeight','bold')
 title('PetCO2')
-if p_MDvsCVRratioGEPETCO2(1,2)<0.001
-    subtitle(strcat('r=',r_MDvsCVRratioGEPETCO2_str,'***'),'FontWeight','bold');
-elseif p_MDvsCVRratioGEPETCO2(1,2)<0.01
-    subtitle(strcat('r=',r_MDvsCVRratioGEPETCO2_str,'**'),'FontWeight','bold');
-elseif p_MDvsCVRratioGEPETCO2(1,2)<0.05
-    subtitle(strcat('r=',r_MDvsCVRratioGEPETCO2_str,'*'),'FontWeight','bold');
+if p_MDvsCVRratioBOLDASL_GEPETCO2(1,2)<0.001
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDASL_GEPETCO2_str,'***'),'FontWeight','bold');
+elseif p_MDvsCVRratioBOLDASL_GEPETCO2(1,2)<0.01
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDASL_GEPETCO2_str,'**'),'FontWeight','bold');
+elseif p_MDvsCVRratioBOLDASL_GEPETCO2(1,2)<0.05
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDASL_GEPETCO2_str,'*'),'FontWeight','bold');
 else
-    title(strcat('r=',r_MDvsCVRratioGEPETCO2_str,''),'FontWeight','bold');   
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_GEPETCO2_str,''),'FontWeight','bold');   
 end
 
 ax3=subplot(2,2,3);
-histogram2(median_CVRratio_petCO2_SE_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_CVRratioBOLDASL_petCO2_SE_GM_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR SE','FontWeight','bold')
-if p_MDvsCVRratioSEPETCO2(1,2)<0.001
-    title(strcat('r=',r_MDvsCVRratioSEPETCO2_str,'***'),'FontWeight','bold');
-elseif p_MDvsCVRratioSEPETCO2(1,2)<0.01
-    title(strcat('r=',r_MDvsCVRratioSEPETCO2_str,'**'),'FontWeight','bold');
-elseif p_MDvsCVRratioSEPETCO2(1,2)<0.05
-    title(strcat('r=',r_MDvsCVRratioSEPETCO2_str,'*'),'FontWeight','bold');
+if p_MDvsCVRratioBOLDASL_SEPETCO2(1,2)<0.001
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_SEPETCO2_str,'***'),'FontWeight','bold');
+elseif p_MDvsCVRratioBOLDASL_SEPETCO2(1,2)<0.01
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_SEPETCO2_str,'**'),'FontWeight','bold');
+elseif p_MDvsCVRratioBOLDASL_SEPETCO2(1,2)<0.05
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_SEPETCO2_str,'*'),'FontWeight','bold');
 else
-    title(strcat('r=',r_MDvsCVRratioSEPETCO2_str,''),'FontWeight','bold');
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_SEPETCO2_str,''),'FontWeight','bold');
 end
 
 
 ax2=subplot(2,2,2);
-histogram2(median_CVRratio_BOLDGM_GE_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_CVRratioBOLDASL_BOLDGM_GE_GM_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR GE','FontWeight','bold')
 title('BOLDGM')
-if p_MDvsCVRratioGEBOLDGM(1,2)<0.001
-    subtitle(strcat('r=',r_MDvsCVRratioGEBOLDGM_str,'***'),'FontWeight','bold');
-elseif p_MDvsCVRratioGEBOLDGM(1,2)<0.01
-    subtitle(strcat('r=',r_MDvsCVRratioGEBOLDGM_str,'**'),'FontWeight','bold');
-elseif p_MDvsCVRratioGEBOLDGM(1,2)<0.05
-    subtitle(strcat('r=',r_MDvsCVRratioGEBOLDGM_str,'*'),'FontWeight','bold');
+if p_MDvsCVRratioBOLDASL_GEBOLDGM(1,2)<0.001
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDASL_GEBOLDGM_str,'***'),'FontWeight','bold');
+elseif p_MDvsCVRratioBOLDASL_GEBOLDGM(1,2)<0.01
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDASL_GEBOLDGM_str,'**'),'FontWeight','bold');
+elseif p_MDvsCVRratioBOLDASL_GEBOLDGM(1,2)<0.05
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDASL_GEBOLDGM_str,'*'),'FontWeight','bold');
 else
-    title(strcat('r=',r_MDvsCVRratioGEBOLDGM_str,''),'FontWeight','bold');
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_GEBOLDGM_str,''),'FontWeight','bold');
 end
 
 ax4=subplot(2,2,4);
-histogram2(median_CVRratio_BOLDGM_SE_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_CVRratioBOLDASL_BOLDGM_SE_GM_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR SE','FontWeight','bold')
-if p_MDvsCVRratioSEBOLDGM(1,2)<0.001
-    title(strcat('r=',r_MDvsCVRratioSEBOLDGM_str,'***'),'FontWeight','bold');
-elseif p_MDvsCVRratioSEBOLDGM(1,2)<0.01
-    title(strcat('r=',r_MDvsCVRratioSEBOLDGM_str,'**'),'FontWeight','bold');
-elseif p_MDvsCVRratioSEBOLDGM(1,2)<0.05
-    title(strcat('r=',r_MDvsCVRratioSEBOLDGM_str,'*'),'FontWeight','bold');
+if p_MDvsCVRratioBOLDASL_SEBOLDGM(1,2)<0.001
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_SEBOLDGM_str,'***'),'FontWeight','bold');
+elseif p_MDvsCVRratioBOLDASL_SEBOLDGM(1,2)<0.01
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_SEBOLDGM_str,'**'),'FontWeight','bold');
+elseif p_MDvsCVRratioBOLDASL_SEBOLDGM(1,2)<0.05
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_SEBOLDGM_str,'*'),'FontWeight','bold');
 else
-    title(strcat('r=',r_MDvsCVRratioSEBOLDGM_str,''),'FontWeight','bold');
+    title(strcat('r=',r_MDvsCVRratioBOLDASL_SEBOLDGM_str,''),'FontWeight','bold');
 end
 
 
-sgtitle('CVR Ratio vs MD','FontWeight','bold')
+sgtitle('CVR Ratio BOLD ASL vs MD','FontWeight','bold')
+
+%% histogram 2d ratio CVR_BOLDSE/CVR_BOLDGE
+
+r_MDvsCVRratioBOLDBOLD_petCO2_str=num2str(round(r_MDvsCVRratioBOLDBOLD_petCO2(1,2),2));
+r_MDvsCVRratioBOLDBOLD_BOLDGM_str=num2str(round(r_MDvsCVRratioBOLDBOLD_BOLDGM(1,2),2));
+
+figure,
+ax1=subplot(1,2,1);
+histogram2(median_CVRratioBOLDBOLD_petCO2_GM_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+xlabel('MD','FontWeight','bold')
+ylabel('CVR ratio BOLDSE/BOLDGE','FontWeight','bold')
+title('PetCO2 regressor')
+if p_MDvsCVRratioBOLDBOLD_petCO2(1,2)<0.001
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDBOLD_petCO2_str,'***'),'FontWeight','bold');
+elseif p_MDvsCVRratioGEPETCO2(1,2)<0.01
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDBOLD_petCO2_str,'**'),'FontWeight','bold');
+elseif p_MDvsCVRratioGEPETCO2(1,2)<0.05
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDBOLD_petCO2_str,'*'),'FontWeight','bold');
+else
+    title(strcat('r=',r_MDvsCVRratioBOLDBOLD_petCO2_str,''),'FontWeight','bold');   
+end
+
+ax2=subplot(1,2,2);
+histogram2(median_CVRratioBOLDBOLD_BOLDGM_GM_subjs(:),median_MD_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+xlabel('MD','FontWeight','bold')
+ylabel('CVR ratio BOLDSE/BOLDGE','FontWeight','bold')
+title('BOLDGM regressor')
+if p_MDvsCVRratioBOLDBOLD_BOLDGM(1,2)<0.001
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDBOLD_BOLDGM_str,'***'),'FontWeight','bold');
+elseif p_MDvsCVRratioSEPETCO2(1,2)<0.01
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDBOLD_BOLDGM_str,'**'),'FontWeight','bold');
+elseif p_MDvsCVRratioSEPETCO2(1,2)<0.05
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDBOLD_BOLDGM_str,'*'),'FontWeight','bold');
+else
+    subtitle(strcat('r=',r_MDvsCVRratioBOLDBOLD_BOLDGM_str,''),'FontWeight','bold');
+end
+
+
+
+sgtitle('CVR Ratio BOLDSE/BOLDGE vs MD','FontWeight','bold')
 
 
 
