@@ -8,6 +8,10 @@
 path = '/media/nas_rete/Work_manuela/DEXIGESEDiffProject/SUBJ2MNI'; % itab
 % path = '/home/c25078236/Desktop/DEXIGESE/SUBJ2MNI';
 
+tissue = 'GM'; %WM
+
+
+
 %% read subjects file
 
 subjects_cvr = importdata(strcat(path,'/subjects_CVR.txt'));
@@ -101,33 +105,39 @@ end
 %% load PVE maps
 %PVE
 
+if strcmp(tissue,'GM')
+    PVE_number = 1;
+    PVE_str = num2str(PVE_number);
+end
 
-
-V_PVE_GM_dwi_maps={};
+V_PVE_tissue_dwi_maps={};
 
 for i = 1:n_subjs         
     subj = subjects_dwi(i);
     subj=subj{1};
 
-    img_path_PVE_GM_dwi=strcat(path,'/PVE/',subj,'_t1_mp2rage_sag_p3_iso_fast_UNI_brain_pve_1_2MNI2mm.nii.gz');
+    img_path_PVE_tissue_dwi=strcat(path,'/PVE/',subj,'_t1_mp2rage_sag_p3_iso_fast_UNI_brain_pve_',PVE_str,'_2MNI2mm.nii.gz');
 
-    V_vol_PVE_GM_dwi = spm_vol(img_path_PVE_GM_dwi);
-    V_PVE_GM_dwi=spm_read_vols(V_vol_PVE_GM_dwi);
-    V_PVE_GM_dwi_maps{end+1}=V_PVE_GM_dwi;
+    V_vol_PVE_tissue_dwi = spm_vol(img_path_PVE_tissue_dwi);
+    V_PVE_tissue_dwi=spm_read_vols(V_vol_PVE_tissue_dwi);
+    V_PVE_tissue_dwi_maps{end+1}=V_PVE_tissue_dwi;
 end
 
-V_PVE_GM_cvr_maps={};
+% create two variables for each space in case you want different thresholds
+% of pve maps.
 
-for i = 1:n_subjs         
-    subj = subjects_cvr(i);
-    subj=subj{1};
+V_PVE_tissue_cvr_maps=V_PVE_tissue_dwi_maps;
 
-    img_path_PVE_GM_cvr=strcat(path,'/PVE/',subj,'_t1_mp2rage_sag_p3_iso_fast_UNI_brain_pve_1_2MNI2mm.nii.gz');
-
-    V_vol_PVE_GM_cvr = spm_vol(img_path_PVE_GM_cvr);
-    V_PVE_GM_cvr=spm_read_vols(V_vol_PVE_GM_cvr);
-    V_PVE_GM_cvr_maps{end+1}=V_PVE_GM_cvr;
-end
+% for i = 1:n_subjs         
+%     subj = subjects_cvr(i);
+%     subj=subj{1};
+% 
+%     img_path_PVE_tissue_cvr=strcat(path,'/PVE/',subj,'_t1_mp2rage_sag_p3_iso_fast_UNI_brain_pve_1_2MNI2mm.nii.gz');
+% 
+%     V_vol_PVE_tissue_cvr = spm_vol(img_path_PVE_tissue_cvr);
+%     V_PVE_tissue_cvr=spm_read_vols(V_vol_PVE_tissue_cvr);
+%     V_PVE_tissue_cvr_maps{end+1}=V_PVE_tissue_cvr;
+% end
 
 
 
@@ -141,25 +151,19 @@ end
 
 
 
-MD_map_GM_subjs = {};
-petCO2_CVRBOLD_GE_map_GM_subjs = {};
-petCO2_CVRASL_GE_map_GM_subjs = {};
-BOLDGM_CVRBOLD_GE_map_GM_subjs = {};
-BOLDGM_CVRASL_GE_map_GM_subjs = {};
+MD_map_tissue_subjs = {};
+petCO2_CVRBOLD_GE_map_tissue_subjs = {};
+petCO2_CVRASL_GE_map_tissue_subjs = {};
+BOLDGM_CVRBOLD_GE_map_tissue_subjs = {};
+BOLDGM_CVRASL_GE_map_tissue_subjs = {};
 
-petCO2_CVRBOLD_SE_map_GM_subjs = {};
-petCO2_CVRASL_SE_map_GM_subjs = {};
-BOLDGM_CVRBOLD_SE_map_GM_subjs = {};
-BOLDGM_CVRASL_SE_map_GM_subjs = {};
+petCO2_CVRBOLD_SE_map_tissue_subjs = {};
+petCO2_CVRASL_SE_map_tissue_subjs = {};
+BOLDGM_CVRBOLD_SE_map_tissue_subjs = {};
+BOLDGM_CVRASL_SE_map_tissue_subjs = {};
 
-CVRratio_petCO2_GE_subjs = {};
-CVRratio_BOLDGM_GE_subjs = {};
-
-CVRratio_petCO2_SE_subjs = {};
-CVRratio_BOLDGM_SE_subjs = {};
-
-CVRratio_BOLDGM_GM_subjs = {};
-CVRratio_petCO2_GM_subjs = {};
+CVRratio_BOLDGM_tissue_subjs = {};
+CVRratio_petCO2_tissue_subjs = {};
 
 CVRratio_GMmedian_regBOLDGM_subjs = [];
 CVRratio_GMmedian_regPETCO2_subjs = [];
@@ -170,6 +174,14 @@ CVRBOLD_GE_GMmedian_regPetCO2_subjs = [];
 CVRBOLD_SE_GMmedian_regPetCO2_subjs = [];
 
 MD_map_GMmedian_subjs = [];
+
+CVRratio_petCO2_GE_subjs = {};
+CVRratio_BOLDGM_GE_subjs = {};
+
+CVRratio_petCO2_SE_subjs = {};
+CVRratio_BOLDGM_SE_subjs = {};
+
+
 
 for i = 1:n_subjs
     %load dwi
@@ -187,31 +199,31 @@ for i = 1:n_subjs
     BOLDGM_CVRASL_SE_map = V_BOLDGM_CVRASL_SE_maps{i};
 
     %load pve
-    PVE_GM_dwi_map = V_PVE_GM_dwi_maps{i};
-    PVE_GM_cvr_map = V_PVE_GM_cvr_maps{i};
+    PVE_tissue_dwi_map = V_PVE_tissue_dwi_maps{i};
+    PVE_tissue_cvr_map = V_PVE_tissue_cvr_maps{i};
 
     %binarize
-    PVE_GM_dwi_map(PVE_GM_dwi_map>0.5)=1;
-    PVE_GM_dwi_map(PVE_GM_dwi_map<1)=0;   
-    PVE_GM_cvr_map(PVE_GM_cvr_map>0.5)=1;
-    PVE_GM_cvr_map(PVE_GM_cvr_map<1)=0; 
+    PVE_tissue_dwi_map(PVE_tissue_dwi_map>0.5)=1;
+    PVE_tissue_dwi_map(PVE_tissue_dwi_map<1)=0;   
+    PVE_tissue_cvr_map(PVE_tissue_cvr_map>0.5)=1;
+    PVE_tissue_cvr_map(PVE_tissue_cvr_map<1)=0; 
 
-    % PVE_GM_dwi_map(PVE_GM_dwi_map==0)=NaN;
-    % PVE_GM_cvr_map(PVE_GM_cvr_map==0)=NaN;
+    % PVE_tissue_dwi_map(PVE_tissue_dwi_map==0)=NaN;
+    % PVE_tissue_cvr_map(PVE_tissue_cvr_map==0)=NaN;
 
     %select GM
 
-    MD_map_GM = MD_map.*PVE_GM_dwi_map;
+    MD_map_GM = MD_map.*PVE_tissue_dwi_map;
 
-    petCO2_CVRBOLD_GE_map_GM = petCO2_CVRBOLD_GE_map.*PVE_GM_cvr_map;
-    petCO2_CVRASL_GE_map_GM = petCO2_CVRASL_GE_map.*PVE_GM_cvr_map;
-    BOLDGM_CVRBOLD_GE_map_GM = BOLDGM_CVRBOLD_GE_map.*PVE_GM_cvr_map;
-    BOLDGM_CVRASL_GE_map_GM = BOLDGM_CVRASL_GE_map.*PVE_GM_cvr_map;
+    petCO2_CVRBOLD_GE_map_GM = petCO2_CVRBOLD_GE_map.*PVE_tissue_cvr_map;
+    petCO2_CVRASL_GE_map_GM = petCO2_CVRASL_GE_map.*PVE_tissue_cvr_map;
+    BOLDGM_CVRBOLD_GE_map_GM = BOLDGM_CVRBOLD_GE_map.*PVE_tissue_cvr_map;
+    BOLDGM_CVRASL_GE_map_GM = BOLDGM_CVRASL_GE_map.*PVE_tissue_cvr_map;
 
-    petCO2_CVRBOLD_SE_map_GM = petCO2_CVRBOLD_SE_map.*PVE_GM_cvr_map;
-    petCO2_CVRASL_SE_map_GM = petCO2_CVRASL_SE_map.*PVE_GM_cvr_map;
-    BOLDGM_CVRBOLD_SE_map_GM = BOLDGM_CVRBOLD_SE_map.*PVE_GM_cvr_map;
-    BOLDGM_CVRASL_SE_map_GM = BOLDGM_CVRASL_SE_map.*PVE_GM_cvr_map;
+    petCO2_CVRBOLD_SE_map_GM = petCO2_CVRBOLD_SE_map.*PVE_tissue_cvr_map;
+    petCO2_CVRASL_SE_map_GM = petCO2_CVRASL_SE_map.*PVE_tissue_cvr_map;
+    BOLDGM_CVRBOLD_SE_map_GM = BOLDGM_CVRBOLD_SE_map.*PVE_tissue_cvr_map;
+    BOLDGM_CVRASL_SE_map_GM = BOLDGM_CVRASL_SE_map.*PVE_tissue_cvr_map;
     
     %put all zeros equal to NaN
 
@@ -264,16 +276,16 @@ for i = 1:n_subjs
   
     %append results for voxel wise analysis
 
-    MD_map_GM_subjs{end+1} = MD_map_GM;
-    petCO2_CVRBOLD_GE_map_GM_subjs{end+1} = petCO2_CVRBOLD_GE_map_GM;
-    petCO2_CVRASL_GE_map_GM_subjs{end+1} = petCO2_CVRASL_GE_map_GM;
-    BOLDGM_CVRBOLD_GE_map_GM_subjs{end+1} = BOLDGM_CVRBOLD_GE_map_GM;
-    BOLDGM_CVRASL_GE_map_GM_subjs{end+1} = BOLDGM_CVRASL_GE_map_GM;
+    MD_map_tissue_subjs{end+1} = MD_map_GM;
+    petCO2_CVRBOLD_GE_map_tissue_subjs{end+1} = petCO2_CVRBOLD_GE_map_GM;
+    petCO2_CVRASL_GE_map_tissue_subjs{end+1} = petCO2_CVRASL_GE_map_GM;
+    BOLDGM_CVRBOLD_GE_map_tissue_subjs{end+1} = BOLDGM_CVRBOLD_GE_map_GM;
+    BOLDGM_CVRASL_GE_map_tissue_subjs{end+1} = BOLDGM_CVRASL_GE_map_GM;
     
-    petCO2_CVRBOLD_SE_map_GM_subjs{end+1} = petCO2_CVRBOLD_SE_map_GM;
-    petCO2_CVRASL_SE_map_GM_subjs{end+1} = petCO2_CVRASL_SE_map_GM;
-    BOLDGM_CVRBOLD_SE_map_GM_subjs{end+1} = BOLDGM_CVRBOLD_SE_map_GM;
-    BOLDGM_CVRASL_SE_map_GM_subjs{end+1}= BOLDGM_CVRASL_SE_map_GM;
+    petCO2_CVRBOLD_SE_map_tissue_subjs{end+1} = petCO2_CVRBOLD_SE_map_GM;
+    petCO2_CVRASL_SE_map_tissue_subjs{end+1} = petCO2_CVRASL_SE_map_GM;
+    BOLDGM_CVRBOLD_SE_map_tissue_subjs{end+1} = BOLDGM_CVRBOLD_SE_map_GM;
+    BOLDGM_CVRASL_SE_map_tissue_subjs{end+1}= BOLDGM_CVRASL_SE_map_GM;
 
     CVRratio_petCO2_GE_subjs{end+1} = CVRratio_petCO2_GE;
     CVRratio_BOLDGM_GE_subjs{end+1} = CVRratio_BOLDGM_GE;
@@ -281,8 +293,8 @@ for i = 1:n_subjs
     CVRratio_petCO2_SE_subjs{end+1} = CVRratio_petCO2_SE;
     CVRratio_BOLDGM_SE_subjs{end+1} = CVRratio_BOLDGM_SE;
 
-    CVRratio_BOLDGM_GM_subjs{end+1} = CVRratio_BOLDGM;
-    CVRratio_petCO2_GM_subjs{end+1} = CVRratio_petCO2;
+    CVRratio_BOLDGM_tissue_subjs{end+1} = CVRratio_BOLDGM;
+    CVRratio_petCO2_tissue_subjs{end+1} = CVRratio_petCO2;
 
 end
 
@@ -292,36 +304,36 @@ end
 %% computing medians across voxels (in the tissue of interest)
 
 %dwi
-all_MD_map_GM_subjs = cat(4,MD_map_GM_subjs{:});
-median_MD_map_GM_subjs = nanmedian(all_MD_map_GM_subjs,4);
+all_MD_map_tissue_subjs = cat(4,MD_map_tissue_subjs{:});
+median_MD_map_tissue_subjs = nanmedian(all_MD_map_tissue_subjs,4);
 
 %cvr
 
 %GE
-all_petCO2_CVRBOLD_GE_map_GM_subjs = cat(4,petCO2_CVRBOLD_GE_map_GM_subjs{:});
-median_petCO2_CVRBOLD_GE_map_GM_subjs = nanmedian(all_petCO2_CVRBOLD_GE_map_GM_subjs,4);
+all_petCO2_CVRBOLD_GE_map_tissue_subjs = cat(4,petCO2_CVRBOLD_GE_map_tissue_subjs{:});
+median_petCO2_CVRBOLD_GE_map_tissue_subjs = nanmedian(all_petCO2_CVRBOLD_GE_map_tissue_subjs,4);
 
-all_petCO2_CVRASL_GE_map_GM_subjs = cat(4,petCO2_CVRASL_GE_map_GM_subjs{:});
-median_petCO2_CVRASL_GE_map_GM_subjs = nanmedian(all_petCO2_CVRASL_GE_map_GM_subjs,4);
+all_petCO2_CVRASL_GE_map_tissue_subjs = cat(4,petCO2_CVRASL_GE_map_tissue_subjs{:});
+median_petCO2_CVRASL_GE_map_tissue_subjs = nanmedian(all_petCO2_CVRASL_GE_map_tissue_subjs,4);
 
-all_BOLDGM_CVRBOLD_GE_map_GM_subjs = cat(4,BOLDGM_CVRBOLD_GE_map_GM_subjs{:});
-median_BOLDGM_CVRBOLD_GE_map_GM_subjs = nanmedian(all_BOLDGM_CVRBOLD_GE_map_GM_subjs,4);
+all_BOLDGM_CVRBOLD_GE_map_tissue_subjs = cat(4,BOLDGM_CVRBOLD_GE_map_tissue_subjs{:});
+median_BOLDGM_CVRBOLD_GE_map_tissue_subjs = nanmedian(all_BOLDGM_CVRBOLD_GE_map_tissue_subjs,4);
 
-all_BOLDGM_CVRASL_GE_map_GM_subjs = cat(4,BOLDGM_CVRASL_GE_map_GM_subjs{:});
-median_BOLDGM_CVRASL_GE_map_GM_subjs = nanmedian(all_BOLDGM_CVRASL_GE_map_GM_subjs,4);
+all_BOLDGM_CVRASL_GE_map_tissue_subjs = cat(4,BOLDGM_CVRASL_GE_map_tissue_subjs{:});
+median_BOLDGM_CVRASL_GE_map_tissue_subjs = nanmedian(all_BOLDGM_CVRASL_GE_map_tissue_subjs,4);
 
 %SE
-all_petCO2_CVRBOLD_SE_map_GM_subjs = cat(4,petCO2_CVRBOLD_SE_map_GM_subjs{:});
-median_petCO2_CVRBOLD_SE_map_GM_subjs = nanmedian(all_petCO2_CVRBOLD_SE_map_GM_subjs,4);
+all_petCO2_CVRBOLD_SE_map_tissue_subjs = cat(4,petCO2_CVRBOLD_SE_map_tissue_subjs{:});
+median_petCO2_CVRBOLD_SE_map_tissue_subjs = nanmedian(all_petCO2_CVRBOLD_SE_map_tissue_subjs,4);
 
-all_petCO2_CVRASL_SE_map_GM_subjs = cat(4,petCO2_CVRASL_SE_map_GM_subjs{:});
-median_petCO2_CVRASL_SE_map_GM_subjs = nanmedian(all_petCO2_CVRASL_SE_map_GM_subjs,4);
+all_petCO2_CVRASL_SE_map_tissue_subjs = cat(4,petCO2_CVRASL_SE_map_tissue_subjs{:});
+median_petCO2_CVRASL_SE_map_tissue_subjs = nanmedian(all_petCO2_CVRASL_SE_map_tissue_subjs,4);
 
-all_BOLDGM_CVRBOLD_SE_map_GM_subjs = cat(4,BOLDGM_CVRBOLD_SE_map_GM_subjs{:});
-median_BOLDGM_CVRBOLD_SE_map_GM_subjs = nanmedian(all_BOLDGM_CVRBOLD_SE_map_GM_subjs,4);
+all_BOLDGM_CVRBOLD_SE_map_tissue_subjs = cat(4,BOLDGM_CVRBOLD_SE_map_tissue_subjs{:});
+median_BOLDGM_CVRBOLD_SE_map_tissue_subjs = nanmedian(all_BOLDGM_CVRBOLD_SE_map_tissue_subjs,4);
 
-all_BOLDGM_CVRASL_SE_map_GM_subjs = cat(4,BOLDGM_CVRASL_SE_map_GM_subjs{:});
-median_BOLDGM_CVRASL_SE_map_GM_subjs = nanmedian(all_BOLDGM_CVRASL_SE_map_GM_subjs,4);
+all_BOLDGM_CVRASL_SE_map_tissue_subjs = cat(4,BOLDGM_CVRASL_SE_map_tissue_subjs{:});
+median_BOLDGM_CVRASL_SE_map_tissue_subjs = nanmedian(all_BOLDGM_CVRASL_SE_map_tissue_subjs,4);
 
 %ratio
 all_CVRratio_petCO2_GE_subjs = cat(4,CVRratio_petCO2_GE_subjs{:});
@@ -338,17 +350,17 @@ median_CVRratio_BOLDGM_SE_subjs = nanmedian(all_CVRratio_BOLDGM_SE_subjs,4);
 
 %ratio CVRSE/CVRGE
 
-all_CVRratio_BOLDGM_GM_subjs = cat(4,CVRratio_BOLDGM_GM_subjs{:});
-median_CVRratio_BOLDGM_GM_subjs = nanmedian(all_CVRratio_BOLDGM_GM_subjs,4);
+all_CVRratio_BOLDGM_tissue_subjs = cat(4,CVRratio_BOLDGM_tissue_subjs{:});
+median_CVRratio_BOLDGM_tissue_subjs = nanmedian(all_CVRratio_BOLDGM_tissue_subjs,4);
 
-all_CVRratio_petCO2_GM_subjs = cat(4,CVRratio_petCO2_GM_subjs{:});
-median_CVRratio_petCO2_GM_subjs = nanmedian(all_CVRratio_petCO2_GM_subjs,4);
+all_CVRratio_petCO2_tissue_subjs = cat(4,CVRratio_petCO2_tissue_subjs{:});
+median_CVRratio_petCO2_tissue_subjs = nanmedian(all_CVRratio_petCO2_tissue_subjs,4);
 
 
 
 %% WHOLE maps
 
-dim=size(median_MD_map_GM_subjs);
+dim=size(median_MD_map_tissue_subjs);
 
 
 %% MD
@@ -363,7 +375,7 @@ colormap(gray)
 clim([0,0.0009])
 
 figure, 
-imagesc(rot90(median_MD_map_GM_subjs(:,:,round(dim(3)/2))))
+imagesc(rot90(median_MD_map_tissue_subjs(:,:,round(dim(3)/2))))
 title('Mean Diffusivity')
 colormap(gray)
 clim([0,0.0009])
@@ -547,13 +559,13 @@ sgtitle('CVR ratio','FontWeight','bold')
 
 figure,
 ax1 = subplot(1,2,1);
-imagesc(rot90(median_CVRratio_petCO2_GM_subjs(:,:,round(dim(3)/2))));
+imagesc(rot90(median_CVRratio_petCO2_tissue_subjs(:,:,round(dim(3)/2))));
 title('regressor PetCO2');
 % subtitle('CVRratio','FontWeight','bold');
 clim([0,0.9])
 
 ax2 = subplot(1,2,2);
-imagesc(rot90(median_CVRratio_BOLDGM_GM_subjs(:,:,round(dim(3)/2))));
+imagesc(rot90(median_CVRratio_BOLDGM_tissue_subjs(:,:,round(dim(3)/2))));
 title('regressor BOLDGM');
 % subtitle('CVRratio','FontWeight','bold');
 clim([0,0.9])
@@ -572,29 +584,29 @@ sgtitle('CVR ratio (Grey Matter, PVE>0.5)','FontWeight','bold')
 %% calculate correlation coefficients (without outliers removal)
 
 %cvr GE regPetCO2
-[r_MDvsCVRBOLDGEPETCO2,p_MDvsCVRBOLDGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRBOLDGEPETCO2,p_MDvsCVRBOLDGEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_GE_map_tissue_subjs(:),'rows','complete');
 % disp(strcat('regPetCO2 MD vs CVR BOLD GE',num2str(r_MDvsCVRBOLDGEPETCO2(2))))
 
-[r_MDvsCVRASLGEPETCO2,p_MDvsCVRASLGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRASLGEPETCO2,p_MDvsCVRASLGEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_petCO2_CVRASL_GE_map_tissue_subjs(:),'rows','complete');
 %cvr GE regBOLDGM
-[r_MDvsCVRBOLDGEBOLDGM,p_MDvsCVRBOLDGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLGEBOLDGM,p_MDvsCVRASLGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRBOLDGEBOLDGM,p_MDvsCVRBOLDGEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(:),'rows','complete');
+[r_MDvsCVRASLGEBOLDGM,p_MDvsCVRASLGEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRASL_GE_map_tissue_subjs(:),'rows','complete');
 
 %cvr SE regPetCO2
-[r_MDvsCVRBOLDSEPETCO2,p_MDvsCVRBOLDSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLSEPETCO2,p_MDvsCVRASLSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRBOLDSEPETCO2,p_MDvsCVRBOLDSEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_SE_map_tissue_subjs(:),'rows','complete');
+[r_MDvsCVRASLSEPETCO2,p_MDvsCVRASLSEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_petCO2_CVRASL_SE_map_tissue_subjs(:),'rows','complete');
 %cvr SE regBOLDGM
-[r_MDvsCVRBOLDSEBOLDGM,p_MDvsCVRBOLDSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLSEBOLDGM,p_MDvsCVRASLSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRBOLDSEBOLDGM,p_MDvsCVRBOLDSEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(:),'rows','complete');
+[r_MDvsCVRASLSEBOLDGM,p_MDvsCVRASLSEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRASL_SE_map_tissue_subjs(:),'rows','complete');
 
 %cvr ratio GE regPetCO2
-[r_MDvsCVRratioGEPETCO2,p_MDvsCVRratioGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_GE_subjs(:),'rows','complete');
+[r_MDvsCVRratioGEPETCO2,p_MDvsCVRratioGEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_petCO2_GE_subjs(:),'rows','complete');
 %cvr ratio GE BOLDGM
-[r_MDvsCVRratioGEBOLDGM,p_MDvsCVRratioGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_GE_subjs(:),'rows','complete');
+[r_MDvsCVRratioGEBOLDGM,p_MDvsCVRratioGEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_BOLDGM_GE_subjs(:),'rows','complete');
 %cvr ratio SE regPetCo2
-[r_MDvsCVRratioSEPETCO2,p_MDvsCVRratioSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_SE_subjs(:),'rows','complete');
+[r_MDvsCVRratioSEPETCO2,p_MDvsCVRratioSEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_petCO2_SE_subjs(:),'rows','complete');
 %cvr ratio SE BOLDGM
-[r_MDvsCVRratioSEBOLDGM,p_MDvsCVRratioSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_SE_subjs(:),'rows','complete');
+[r_MDvsCVRratioSEBOLDGM,p_MDvsCVRratioSEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_BOLDGM_SE_subjs(:),'rows','complete');
 
 
 
@@ -602,7 +614,7 @@ sgtitle('CVR ratio (Grey Matter, PVE>0.5)','FontWeight','bold')
 
 disp('%%%%%%% REMOVING OUTLIERS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 
-dim=size(median_MD_map_GM_subjs);
+dim=size(median_MD_map_tissue_subjs);
 low_prc = 5;
 high_prc = 95;
 
@@ -652,123 +664,123 @@ median_CVRratio_BOLDGM_SE_subjs(median_CVRratio_BOLDGM_SE_subjs<prcLOW_MD | medi
 
 
 %% MD
-prcLOW_MD = prctile(median_MD_map_GM_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_MD_map_GM_subjs(:),high_prc);
-median_MD_map_GM_subjs(median_MD_map_GM_subjs<prcLOW_MD | median_MD_map_GM_subjs>prcHIGH_MD)=NaN;
+prcLOW_MD = prctile(median_MD_map_tissue_subjs(:),low_prc);
+prcHIGH_MD = prctile(median_MD_map_tissue_subjs(:),high_prc);
+median_MD_map_tissue_subjs(median_MD_map_tissue_subjs<prcLOW_MD | median_MD_map_tissue_subjs>prcHIGH_MD)=NaN;
 
 % figure,
-% imagesc(rot90(median_MD_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_MD_map_tissue_subjs(:,:,round(dim(3)/2))))
 % %caxis([0,0.001])
 % title('Mean Diffusivity Map')
 
 %% CVR GE
 
-prcLOW = prctile(median_petCO2_CVRBOLD_GE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_petCO2_CVRBOLD_GE_map_GM_subjs(:),high_prc);
-median_petCO2_CVRBOLD_GE_map_GM_subjs(median_petCO2_CVRBOLD_GE_map_GM_subjs<prcLOW | median_petCO2_CVRBOLD_GE_map_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_petCO2_CVRBOLD_GE_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_petCO2_CVRBOLD_GE_map_tissue_subjs(:),high_prc);
+median_petCO2_CVRBOLD_GE_map_tissue_subjs(median_petCO2_CVRBOLD_GE_map_tissue_subjs<prcLOW | median_petCO2_CVRBOLD_GE_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
-% imagesc(rot90(median_petCO2_CVRBOLD_GE_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_petCO2_CVRBOLD_GE_map_tissue_subjs(:,:,round(dim(3)/2))))
 % title('CVR GE BOLD, regPETCO2')
 
 
-prcLOW = prctile(median_petCO2_CVRASL_GE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_petCO2_CVRASL_GE_map_GM_subjs(:),high_prc);
-median_petCO2_CVRASL_GE_map_GM_subjs(median_petCO2_CVRASL_GE_map_GM_subjs<prcLOW | median_petCO2_CVRASL_GE_map_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_petCO2_CVRASL_GE_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_petCO2_CVRASL_GE_map_tissue_subjs(:),high_prc);
+median_petCO2_CVRASL_GE_map_tissue_subjs(median_petCO2_CVRASL_GE_map_tissue_subjs<prcLOW | median_petCO2_CVRASL_GE_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
-% imagesc(rot90(median_petCO2_CVRASL_GE_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_petCO2_CVRASL_GE_map_tissue_subjs(:,:,round(dim(3)/2))))
 % title('CVR GE ASL, regPETCO2')
 
-prcLOW = prctile(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),high_prc);
-median_BOLDGM_CVRBOLD_GE_map_GM_subjs(median_BOLDGM_CVRBOLD_GE_map_GM_subjs<prcLOW | median_BOLDGM_CVRBOLD_GE_map_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(:),high_prc);
+median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(median_BOLDGM_CVRBOLD_GE_map_tissue_subjs<prcLOW | median_BOLDGM_CVRBOLD_GE_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
-% imagesc(rot90(median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(:,:,round(dim(3)/2))))
 % title('CVR GE BOLD, regBOLD')
 
-prcLOW = prctile(median_BOLDGM_CVRASL_GE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_BOLDGM_CVRASL_GE_map_GM_subjs(:),high_prc);
-median_BOLDGM_CVRASL_GE_map_GM_subjs(median_BOLDGM_CVRASL_GE_map_GM_subjs<prcLOW | median_BOLDGM_CVRASL_GE_map_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_BOLDGM_CVRASL_GE_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_BOLDGM_CVRASL_GE_map_tissue_subjs(:),high_prc);
+median_BOLDGM_CVRASL_GE_map_tissue_subjs(median_BOLDGM_CVRASL_GE_map_tissue_subjs<prcLOW | median_BOLDGM_CVRASL_GE_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
-% imagesc(rot90(median_BOLDGM_CVRASL_GE_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_BOLDGM_CVRASL_GE_map_tissue_subjs(:,:,round(dim(3)/2))))
 % title('CVR GE ASL, regBOLD')
 
 %% CVR SE
 
-prcLOW = prctile(median_petCO2_CVRBOLD_SE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_petCO2_CVRBOLD_SE_map_GM_subjs(:),high_prc);
-median_petCO2_CVRBOLD_SE_map_GM_subjs(median_petCO2_CVRBOLD_SE_map_GM_subjs<prcLOW | median_petCO2_CVRBOLD_SE_map_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_petCO2_CVRBOLD_SE_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_petCO2_CVRBOLD_SE_map_tissue_subjs(:),high_prc);
+median_petCO2_CVRBOLD_SE_map_tissue_subjs(median_petCO2_CVRBOLD_SE_map_tissue_subjs<prcLOW | median_petCO2_CVRBOLD_SE_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
-% imagesc(rot90(median_petCO2_CVRBOLD_SE_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_petCO2_CVRBOLD_SE_map_tissue_subjs(:,:,round(dim(3)/2))))
 % title('CVR SE BOLD, regPETCO2')
 
-prcLOW = prctile(median_petCO2_CVRASL_SE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_petCO2_CVRASL_SE_map_GM_subjs(:),high_prc);
-median_petCO2_CVRASL_SE_map_GM_subjs(median_petCO2_CVRASL_SE_map_GM_subjs<prcLOW | median_petCO2_CVRASL_SE_map_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_petCO2_CVRASL_SE_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_petCO2_CVRASL_SE_map_tissue_subjs(:),high_prc);
+median_petCO2_CVRASL_SE_map_tissue_subjs(median_petCO2_CVRASL_SE_map_tissue_subjs<prcLOW | median_petCO2_CVRASL_SE_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
-% imagesc(rot90(median_petCO2_CVRASL_SE_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_petCO2_CVRASL_SE_map_tissue_subjs(:,:,round(dim(3)/2))))
 % title('CVR SE ASL, regPETCO2')
 
-prcLOW = prctile(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),high_prc);
-median_BOLDGM_CVRBOLD_SE_map_GM_subjs(median_BOLDGM_CVRBOLD_SE_map_GM_subjs<prcLOW | median_BOLDGM_CVRBOLD_SE_map_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(:),high_prc);
+median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(median_BOLDGM_CVRBOLD_SE_map_tissue_subjs<prcLOW | median_BOLDGM_CVRBOLD_SE_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
-% imagesc(rot90(median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(:,:,round(dim(3)/2))))
 % title('CVR SE BOLD, regBOLD')
 
-prcLOW = prctile(median_BOLDGM_CVRASL_SE_map_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_BOLDGM_CVRASL_SE_map_GM_subjs(:),high_prc);
-median_BOLDGM_CVRASL_SE_map_GM_subjs(median_BOLDGM_CVRASL_SE_map_GM_subjs<prcLOW | median_BOLDGM_CVRASL_SE_map_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_BOLDGM_CVRASL_SE_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_BOLDGM_CVRASL_SE_map_tissue_subjs(:),high_prc);
+median_BOLDGM_CVRASL_SE_map_tissue_subjs(median_BOLDGM_CVRASL_SE_map_tissue_subjs<prcLOW | median_BOLDGM_CVRASL_SE_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
-% imagesc(rot90(median_BOLDGM_CVRASL_SE_map_GM_subjs(:,:,round(dim(3)/2))))
+% imagesc(rot90(median_BOLDGM_CVRASL_SE_map_tissue_subjs(:,:,round(dim(3)/2))))
 % title('CVR SE ASL, regBOLD')
 
 %% ratio CVR_BOLDSE/CVR_BOLDGE
 
-prcLOW = prctile(median_CVRratio_petCO2_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_CVRratio_petCO2_GM_subjs(:),high_prc);
-median_CVRratio_petCO2_GM_subjs(median_CVRratio_petCO2_GM_subjs<prcLOW | median_CVRratio_petCO2_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_CVRratio_petCO2_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_CVRratio_petCO2_tissue_subjs(:),high_prc);
+median_CVRratio_petCO2_tissue_subjs(median_CVRratio_petCO2_tissue_subjs<prcLOW | median_CVRratio_petCO2_tissue_subjs>prcHIGH)=NaN;
 
 
-prcLOW = prctile(median_CVRratio_BOLDGM_GM_subjs(:),low_prc);
-prcHIGH = prctile(median_CVRratio_BOLDGM_GM_subjs(:),high_prc);
-median_CVRratio_BOLDGM_GM_subjs(median_CVRratio_BOLDGM_GM_subjs<prcLOW | median_CVRratio_BOLDGM_GM_subjs>prcHIGH)=NaN;
+prcLOW = prctile(median_CVRratio_BOLDGM_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_CVRratio_BOLDGM_tissue_subjs(:),high_prc);
+median_CVRratio_BOLDGM_tissue_subjs(median_CVRratio_BOLDGM_tissue_subjs<prcLOW | median_CVRratio_BOLDGM_tissue_subjs>prcHIGH)=NaN;
 
 %% calculate correlation coefficients (after outliers removal)
 
 %cvr GE regPetCO2
-[r_MDvsCVRBOLDGEPETCO2,p_MDvsCVRBOLDGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLGEPETCO2,p_MDvsCVRASLGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRBOLDGEPETCO2,p_MDvsCVRBOLDGEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_GE_map_tissue_subjs(:),'rows','complete');
+[r_MDvsCVRASLGEPETCO2,p_MDvsCVRASLGEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_petCO2_CVRASL_GE_map_tissue_subjs(:),'rows','complete');
 %cvr GE regBOLDGM
-[r_MDvsCVRBOLDGEBOLDGM,p_MDvsCVRBOLDGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLGEBOLDGM,p_MDvsCVRASLGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRBOLDGEBOLDGM,p_MDvsCVRBOLDGEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(:),'rows','complete');
+[r_MDvsCVRASLGEBOLDGM,p_MDvsCVRASLGEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRASL_GE_map_tissue_subjs(:),'rows','complete');
 
 %cvr SE regPetCO2
-[r_MDvsCVRBOLDSEPETCO2,p_MDvsCVRBOLDSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLSEPETCO2,p_MDvsCVRASLSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRBOLDSEPETCO2,p_MDvsCVRBOLDSEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_SE_map_tissue_subjs(:),'rows','complete');
+[r_MDvsCVRASLSEPETCO2,p_MDvsCVRASLSEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_petCO2_CVRASL_SE_map_tissue_subjs(:),'rows','complete');
 %cvr SE regBOLDGM
-[r_MDvsCVRBOLDSEBOLDGM,p_MDvsCVRBOLDSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),'rows','complete');
-[r_MDvsCVRASLSEBOLDGM,p_MDvsCVRASLSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:),'rows','complete');
+[r_MDvsCVRBOLDSEBOLDGM,p_MDvsCVRBOLDSEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(:),'rows','complete');
+[r_MDvsCVRASLSEBOLDGM,p_MDvsCVRASLSEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRASL_SE_map_tissue_subjs(:),'rows','complete');
 
 %cvr ratio GE regPetCO2
-[r_MDvsCVRratioGEPETCO2,p_MDvsCVRratioGEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_GE_subjs(:),'rows','complete');
+[r_MDvsCVRratioGEPETCO2,p_MDvsCVRratioGEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_petCO2_GE_subjs(:),'rows','complete');
 %cvr ratio GE BOLDGM
-[r_MDvsCVRratioGEBOLDGM,p_MDvsCVRratioGEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_GE_subjs(:),'rows','complete');
+[r_MDvsCVRratioGEBOLDGM,p_MDvsCVRratioGEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_BOLDGM_GE_subjs(:),'rows','complete');
 %cvr ratio SE regPetCo2
-[r_MDvsCVRratioSEPETCO2,p_MDvsCVRratioSEPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_SE_subjs(:),'rows','complete');
+[r_MDvsCVRratioSEPETCO2,p_MDvsCVRratioSEPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_petCO2_SE_subjs(:),'rows','complete');
 %cvr ratio SE BOLDGM
-[r_MDvsCVRratioSEBOLDGM,p_MDvsCVRratioSEBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_SE_subjs(:),'rows','complete');
+[r_MDvsCVRratioSEBOLDGM,p_MDvsCVRratioSEBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_BOLDGM_SE_subjs(:),'rows','complete');
 
 %cvr ratio CVR_BOLDSE/CVR_BOLDGE
-[r_MDvsCVRratio_regBOLDGM,p_MDvsCVRratio_regBOLDGM]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_GM_subjs(:),'rows','complete');
-[r_MDvsCVRratio_regPETCO2,p_MDvsCVRratio_regPETCO2]=corrcoef(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_GM_subjs(:),'rows','complete');
+[r_MDvsCVRratio_regBOLDGM,p_MDvsCVRratio_regBOLDGM]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_BOLDGM_tissue_subjs(:),'rows','complete');
+[r_MDvsCVRratio_regPETCO2,p_MDvsCVRratio_regPETCO2]=corrcoef(median_MD_map_tissue_subjs(:),median_CVRratio_petCO2_tissue_subjs(:),'rows','complete');
 
 %% distributions
 
@@ -798,7 +810,7 @@ median_CVRratio_BOLDGM_GM_subjs(median_CVRratio_BOLDGM_GM_subjs<prcLOW | median_
 %% MD
 
 figure,
-histogram(median_MD_map_GM_subjs)
+histogram(median_MD_map_tissue_subjs)
 ylabel('# of voxels','FontWeight','bold','FontSize',12)
 xlabel('Mean Diffusivity (MD), mm^{2}/s','FontWeight','bold','FontSize',12)
 grid on
@@ -807,42 +819,42 @@ grid on
 
 % figure,
 % ax1=subplot(2,2,1);
-% histogram(median_petCO2_CVRBOLD_GE_map_GM_subjs)
+% histogram(median_petCO2_CVRBOLD_GE_map_tissue_subjs)
 % title('CVR GE BOLD, regPetCO2','FontWeight','bold')
 % 
 % 
 % ax2=subplot(2,2,2);
-% histogram(median_BOLDGM_CVRBOLD_GE_map_GM_subjs)
+% histogram(median_BOLDGM_CVRBOLD_GE_map_tissue_subjs)
 % title('CVR GE BOLD, regBOLDGM','FontWeight','bold')
 % 
 % ax3=subplot(2,2,3);
-% histogram(median_petCO2_CVRASL_GE_map_GM_subjs)
+% histogram(median_petCO2_CVRASL_GE_map_tissue_subjs)
 % title('CVR GE ASL, regPetCO2','FontWeight','bold')
 % 
 % 
 % ax4=subplot(2,2,4);
-% histogram(median_BOLDGM_CVRASL_GE_map_GM_subjs)
+% histogram(median_BOLDGM_CVRASL_GE_map_tissue_subjs)
 % title('CVR GE ASL, regBOLDGM','FontWeight','bold')
 
 %% SE signal
 
 % figure,
 % ax1=subplot(2,2,1);
-% histogram(median_petCO2_CVRBOLD_SE_map_GM_subjs)
+% histogram(median_petCO2_CVRBOLD_SE_map_tissue_subjs)
 % title('CVR SE BOLD, regPetCO2','FontWeight','bold')
 % 
 % 
 % ax2=subplot(2,2,2);
-% histogram(median_BOLDGM_CVRBOLD_SE_map_GM_subjs)
+% histogram(median_BOLDGM_CVRBOLD_SE_map_tissue_subjs)
 % title('CVR SE BOLD, regBOLDGM','FontWeight','bold')
 % 
 % ax3=subplot(2,2,3);
-% histogram(median_petCO2_CVRASL_SE_map_GM_subjs)
+% histogram(median_petCO2_CVRASL_SE_map_tissue_subjs)
 % title('CVR SE ASL, regPetCO2','FontWeight','bold')
 % 
 % 
 % ax4=subplot(2,2,4);
-% histogram(median_BOLDGM_CVRASL_SE_map_GM_subjs)
+% histogram(median_BOLDGM_CVRASL_SE_map_tissue_subjs)
 % title('CVR SE ASL, regBOLDGM','FontWeight','bold')
 
 
@@ -851,7 +863,7 @@ grid on
 figure,
 
 ax1=subplot(2,2,1);
-histogram(median_petCO2_CVRBOLD_GE_map_GM_subjs)
+histogram(median_petCO2_CVRBOLD_GE_map_tissue_subjs)
 xlabel('CVR GE BOLD','FontWeight','bold')
 ylabel('# of voxels','FontWeight','bold','FontSize',12)
 ylim([0,7000])
@@ -859,7 +871,7 @@ title('regPetCO2')
 grid on
 
 ax2=subplot(2,2,2);
-histogram(median_BOLDGM_CVRBOLD_GE_map_GM_subjs)
+histogram(median_BOLDGM_CVRBOLD_GE_map_tissue_subjs)
 xlabel('CVR GE BOLD','FontWeight','bold')
 ylabel('# of voxels','FontWeight','bold','FontSize',12)
 ylim([0,7000])
@@ -867,14 +879,14 @@ title('regBOLDGM')
 grid on
 
 ax3=subplot(2,2,3);
-histogram(median_petCO2_CVRBOLD_SE_map_GM_subjs)
+histogram(median_petCO2_CVRBOLD_SE_map_tissue_subjs)
 xlabel('CVR SE BOLD','FontWeight','bold')
 ylabel('# of voxels','FontWeight','bold','FontSize',12)
 ylim([0,7000])
 grid on
 
 ax4=subplot(2,2,4);
-histogram(median_BOLDGM_CVRBOLD_SE_map_GM_subjs)
+histogram(median_BOLDGM_CVRBOLD_SE_map_tissue_subjs)
 xlabel('CVR SE BOLD','FontWeight','bold')
 ylabel('# of voxels','FontWeight','bold','FontSize',12)
 ylim([0,7000])
@@ -885,14 +897,14 @@ grid on
 figure,
 
 ax1=subplot(1,2,1);
-histogram(median_CVRratio_petCO2_GM_subjs)
+histogram(median_CVRratio_petCO2_tissue_subjs)
 xlabel('CVR ratio, regPetCO2','FontWeight','bold')
 ylabel('# of voxels','FontWeight','bold','FontSize',12)
 ylim([0,4000])
 grid on
 
 ax2=subplot(1,2,2);
-histogram(median_CVRratio_BOLDGM_GM_subjs)
+histogram(median_CVRratio_BOLDGM_tissue_subjs)
 xlabel('CVR ratio, regBOLDGM','FontWeight','bold')
 ylabel('# of voxels','FontWeight','bold','FontSize',12)
 ylim([0,4000])
@@ -927,22 +939,22 @@ sgtitle('CVR ratio distributions','FontWeight','bold','FontSize',12)
 %% scatterplots CVR GE vs MD
 
 % figure,
-% scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:))
+% scatter(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_GE_map_tissue_subjs(:))
 % xlabel('Mean Diffusivity map','FontWeight','bold')
 % ylabel('CVR GE BOLD, regPetCO2','FontWeight','bold')
 % 
 % figure,
-% scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:))
+% scatter(median_MD_map_tissue_subjs(:),median_petCO2_CVRASL_GE_map_tissue_subjs(:))
 % xlabel('Mean Diffusivity map','FontWeight','bold')
 % ylabel('CVR GE ASL, regPetCO2','FontWeight','bold')
 % 
 % figure,
-% scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:))
+% scatter(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(:))
 % xlabel('Mean Diffusivity map','FontWeight','bold')
 % ylabel('CVR GE BOLD, regBOLDGM','FontWeight','bold')
 % 
 % figure,
-% scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:))
+% scatter(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRASL_GE_map_tissue_subjs(:))
 % xlabel('Mean Diffusivity map','FontWeight','bold')
 % ylabel('CVR GE ASL, regBOLDGM','FontWeight','bold')
 
@@ -955,7 +967,7 @@ sgtitle('CVR ratio distributions','FontWeight','bold','FontSize',12)
 % 
 % figure,
 % ax1=subplot(2,2,1);
-% histogram2(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_GE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR BOLD','FontWeight','bold')
 % title('PetCO2')
@@ -970,7 +982,7 @@ sgtitle('CVR ratio distributions','FontWeight','bold','FontSize',12)
 % end
 % 
 % ax2=subplot(2,2,2);
-% histogram2(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR BOLD','FontWeight','bold')
 % title('BOLDGM')
@@ -985,7 +997,7 @@ sgtitle('CVR ratio distributions','FontWeight','bold','FontSize',12)
 % end
 % 
 % ax3=subplot(2,2,3);
-% histogram2(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_GE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_petCO2_CVRASL_GE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR ASL','FontWeight','bold')
 % 
@@ -1000,7 +1012,7 @@ sgtitle('CVR ratio distributions','FontWeight','bold','FontSize',12)
 % end
 % 
 % ax4=subplot(2,2,4);
-% histogram2(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_GE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRASL_GE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR ASL','FontWeight','bold')
 % 
@@ -1019,22 +1031,22 @@ sgtitle('CVR ratio distributions','FontWeight','bold','FontSize',12)
 %% scatterplots MD vs CVR SE
 % %SE signal
 % figure,
-% scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:))
+% scatter(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_SE_map_tissue_subjs(:))
 % xlabel('Mean Diffusivity map','FontWeight','bold')
 % ylabel('CVR SE BOLD, regPetCO2','FontWeight','bold')
 % 
 % figure,
-% scatter(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:))
+% scatter(median_MD_map_tissue_subjs(:),median_petCO2_CVRASL_SE_map_tissue_subjs(:))
 % xlabel('Mean Diffusivity map','FontWeight','bold')
 % ylabel('CVR SE ASL, regPetCO2','FontWeight','bold')
 % 
 % figure,
-% scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:))
+% scatter(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(:))
 % xlabel('Mean Diffusivity map','FontWeight','bold')
 % ylabel('CVR SE BOLD, regBOLDGM','FontWeight','bold')
 % 
 % figure,
-% scatter(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:))
+% scatter(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRASL_SE_map_tissue_subjs(:))
 % xlabel('Mean Diffusivity map','FontWeight','bold')
 % ylabel('CVR SE ASL, regBOLDGM','FontWeight','bold')
 
@@ -1049,7 +1061,7 @@ r_MDvsCVRBOLDGEPETCO2_str=num2str(round(r_MDvsCVRBOLDGEPETCO2(1,2),2));
 
 figure,
 ax1=subplot(2,2,1);
-histogram2(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_GE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_GE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR BOLD GE','FontWeight','bold')
 title('PetCO2')
@@ -1064,7 +1076,7 @@ else
 end
 
 ax2=subplot(2,2,2);
-histogram2(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_GE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_GE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR BOLD GE','FontWeight','bold')
 title('BOLDGM')
@@ -1080,7 +1092,7 @@ end
 
 
 ax3=subplot(2,2,3);
-histogram2(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_SE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR BOLD SE','FontWeight','bold')
 title('PetCO2')
@@ -1098,7 +1110,7 @@ end
 
 
 ax4=subplot(2,2,4);
-histogram2(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR BOLD SE','FontWeight','bold')
 title('BOLDGM')
@@ -1123,7 +1135,7 @@ end
 % 
 % figure,
 % ax1=subplot(2,2,1);
-% histogram2(median_MD_map_GM_subjs(:),median_petCO2_CVRBOLD_SE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_petCO2_CVRBOLD_SE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR BOLD','FontWeight','bold')
 % title('PetCO2')
@@ -1138,7 +1150,7 @@ end
 % end
 % 
 % ax3=subplot(2,2,3);
-% histogram2(median_MD_map_GM_subjs(:),median_petCO2_CVRASL_SE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_petCO2_CVRASL_SE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR ASL','FontWeight','bold')
 % if p_MDvsCVRASLSEPETCO2(1,2)<0.001
@@ -1153,7 +1165,7 @@ end
 % 
 % 
 % ax2=subplot(2,2,2);
-% histogram2(median_MD_map_GM_subjs(:),median_BOLDGM_CVRBOLD_SE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRBOLD_SE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR BOLD','FontWeight','bold')
 % title('BOLDGM')
@@ -1168,7 +1180,7 @@ end
 % end
 % 
 % ax4=subplot(2,2,4);
-% histogram2(median_MD_map_GM_subjs(:),median_BOLDGM_CVRASL_SE_map_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_BOLDGM_CVRASL_SE_map_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR ASL','FontWeight','bold')
 % if p_MDvsCVRASLSEBOLDGM(1,2)<0.001
@@ -1193,7 +1205,7 @@ end
 % 
 % figure,
 % ax1=subplot(2,2,1);
-% histogram2(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_GE_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_CVRratio_petCO2_GE_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR GE','FontWeight','bold')
 % title('PetCO2')
@@ -1208,7 +1220,7 @@ end
 % end
 % 
 % ax3=subplot(2,2,3);
-% histogram2(median_MD_map_GM_subjs(:),median_CVRratio_petCO2_SE_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_CVRratio_petCO2_SE_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR SE','FontWeight','bold')
 % if p_MDvsCVRratioSEPETCO2(1,2)<0.001
@@ -1223,7 +1235,7 @@ end
 % 
 % 
 % ax2=subplot(2,2,2);
-% histogram2(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_GE_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_CVRratio_BOLDGM_GE_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR GE','FontWeight','bold')
 % title('BOLDGM')
@@ -1238,7 +1250,7 @@ end
 % end
 % 
 % ax4=subplot(2,2,4);
-% histogram2(median_MD_map_GM_subjs(:),median_CVRratio_BOLDGM_SE_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+% histogram2(median_MD_map_tissue_subjs(:),median_CVRratio_BOLDGM_SE_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 % xlabel('MD','FontWeight','bold')
 % ylabel('CVR SE','FontWeight','bold')
 % if p_MDvsCVRratioSEBOLDGM(1,2)<0.001
@@ -1263,9 +1275,9 @@ r_MDvsCVRratio_regBOLDGM_str=num2str(round(r_MDvsCVRratio_regBOLDGM(1,2),2));
 
 figure,
 ax1=subplot(1,2,1);
-histogram2(median_MD_map_GM_subjs(:), median_CVRratio_petCO2_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on');
-ylabel('CVR ratio','FontWeight','bold')
+histogram2(median_MD_map_tissue_subjs(:), median_CVRratio_petCO2_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on');
 xlabel('MD','FontWeight','bold')
+ylabel('CVR ratio','FontWeight','bold')
 title('reg PetCO2')
 if p_MDvsCVRratioGEPETCO2(1,2)<0.001
     subtitle(strcat('r=',r_MDvsCVRratio_regPetCO2_str,'***'),'FontWeight','bold');
@@ -1278,7 +1290,7 @@ else
 end
 
 ax2=subplot(1,2,2);
-histogram2(median_MD_map_GM_subjs(:), median_CVRratio_BOLDGM_GM_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
+histogram2(median_MD_map_tissue_subjs(:), median_CVRratio_BOLDGM_tissue_subjs(:),'DisplayStyle','tile','ShowEmptyBins','on')
 xlabel('MD','FontWeight','bold')
 ylabel('CVR ratio','FontWeight','bold')
 title('reg BOLDGM')
