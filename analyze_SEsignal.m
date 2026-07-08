@@ -1720,11 +1720,25 @@ sgtitle(strcat('CVRBOLD vs MD, regressor BOLDGM, tissue=',tissue),'FontWeight','
 
 %% THEORETICAL
 
-x = [0.000000000000001,1.1,5,10,15,20];
-y = [12,4,2.1,1.8,1.6,1.5];
+x = [0.000000000000001,1,1.1,2,3,4,5,10,15,20]';
+y = [12,4.5,4,3.1,2.6,2.4,2.1,1.7,1.6,1.5]';
 
 figure,
-plot(x,y);
+plot(x,y,'o-');
+ylabel('\DeltaR^*_2/\DeltaR_2','FontWeight','bold','FontSize',19,'FontName','Calibri')
+xlabel('D(\mum^2/ms)','FontWeight','bold','FontSize',19,'FontName','Calibri')
+grid on
+
+fitobj=fit(x,y,'exp1');
+a=fitobj.a;
+b=fitobj.b;
+
+x_up=8;
+x_low=7;
+y_up=a*exp(b*x_up);
+y_low=a*exp(b*x_low);
+
+m = (y_up-y_low)./(x_up-x_low);
 
 %% CVRBOLDGE/CVRBOLDSE
 
@@ -1774,3 +1788,23 @@ else
 end
 
 title(strcat('CVR Ratio CVR\_BOLDGE/CVR\_BOLDSE vs MD, tissue=',tissue),'FontWeight','bold','FontSize',19)
+
+%%
+
+idx_MD = find(isnan(median_MD_map_tissue_subjs(:)));
+idx_CVRmap = find(isnan(median_CVRratio_GEoverSE_BOLDGM_tissue_subjs(:)));
+idx_tot = unique(cat(1,idx_MD,idx_CVRmap));
+
+x = median_MD_map_tissue_subjs(:);
+y = median_CVRratio_GEoverSE_BOLDGM_tissue_subjs(:);
+
+x(idx_tot)=[];
+y(idx_tot)=[];
+x=zscore(x);
+y=zscore(y);
+
+tbl=table(x,y, 'VariableNames', ...
+    {'MD','CVRratio'});
+%build your model
+mdl=fitlm(tbl,'CVRratio ~ MD','RobustOpts','on')
+
