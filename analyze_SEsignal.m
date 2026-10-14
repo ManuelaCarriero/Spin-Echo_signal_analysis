@@ -318,6 +318,13 @@ end
 
 %% computing medians across voxels (in the tissue of interest)
 
+%pve (if tissue = 'GM', PVE=GM)
+all_V_PVE_tissue_dwi_maps = cat(4,V_PVE_tissue_dwi_maps{:});
+median_PVE_tissue_dwi_maps = nanmedian(all_V_PVE_tissue_dwi_maps,4);
+
+all_V_PVE_tissue_cvr_maps = cat(4,V_PVE_tissue_cvr_maps{:});
+median_PVE_tissue_cvr_maps = nanmedian(all_V_PVE_tissue_cvr_maps,4);
+
 %dwi
 all_MD_map_tissue_subjs = cat(4,MD_map_tissue_subjs{:});
 median_MD_map_tissue_subjs = nanmedian(all_MD_map_tissue_subjs,4);
@@ -687,7 +694,7 @@ title('CVR ratio (Grey Matter, PVE>0.5)','FontWeight','bold')
 
 disp('%%%%%%% REMOVING OUTLIERS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 
-dim=size(median_MD_map_tissue_subjs);
+% dim=size(median_MD_map_tissue_subjs);
 low_prc = 5;
 high_prc = 95;
 
@@ -695,18 +702,18 @@ high_prc = 95;
 
 %CVR GE
 
-prcLOW_MD = prctile(median_CVRratio_petCO2_GE_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_CVRratio_petCO2_GE_subjs(:),high_prc);
-median_CVRratio_petCO2_GE_subjs(median_CVRratio_petCO2_GE_subjs<prcLOW_MD | median_CVRratio_petCO2_GE_subjs>prcHIGH_MD)=NaN;
+prcLOW = prctile(median_CVRratio_petCO2_GE_subjs(:),low_prc);
+prcHIGH = prctile(median_CVRratio_petCO2_GE_subjs(:),high_prc);
+median_CVRratio_petCO2_GE_subjs(median_CVRratio_petCO2_GE_subjs<prcLOW | median_CVRratio_petCO2_GE_subjs>prcHIGH)=NaN;
 
 % figure,
 % imagesc(rot90(median_CVRratio_petCO2_GE_subjs(:,:,round(dim(3)/2))))
 % %caxis([0,0.001])
 % title('CVR GE, PetCO2')
 
-prcLOW_MD = prctile(median_CVRratio_BOLDGM_GE_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_CVRratio_BOLDGM_GE_subjs(:),high_prc);
-median_CVRratio_BOLDGM_GE_subjs(median_CVRratio_BOLDGM_GE_subjs<prcLOW_MD | median_CVRratio_BOLDGM_GE_subjs>prcHIGH_MD)=NaN;
+prcLOW = prctile(median_CVRratio_BOLDGM_GE_subjs(:),low_prc);
+prcHIGH = prctile(median_CVRratio_BOLDGM_GE_subjs(:),high_prc);
+median_CVRratio_BOLDGM_GE_subjs(median_CVRratio_BOLDGM_GE_subjs<prcLOW | median_CVRratio_BOLDGM_GE_subjs>prcHIGH)=NaN;
 
 % figure,
 % imagesc(rot90(median_CVRratio_BOLDGM_GE_subjs(:,:,round(dim(3)/2))))
@@ -715,18 +722,18 @@ median_CVRratio_BOLDGM_GE_subjs(median_CVRratio_BOLDGM_GE_subjs<prcLOW_MD | medi
 
 % CVR SE 
 
-prcLOW_MD = prctile(median_CVRratio_petCO2_SE_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_CVRratio_petCO2_SE_subjs(:),high_prc);
-median_CVRratio_petCO2_SE_subjs(median_CVRratio_petCO2_SE_subjs<prcLOW_MD | median_CVRratio_petCO2_SE_subjs>prcHIGH_MD)=NaN;
+prcLOW = prctile(median_CVRratio_petCO2_SE_subjs(:),low_prc);
+prcHIGH = prctile(median_CVRratio_petCO2_SE_subjs(:),high_prc);
+median_CVRratio_petCO2_SE_subjs(median_CVRratio_petCO2_SE_subjs<prcLOW | median_CVRratio_petCO2_SE_subjs>prcHIGH)=NaN;
 
 % figure,
 % imagesc(rot90(median_CVRratio_petCO2_SE_subjs(:,:,round(dim(3)/2))))
 % %caxis([0,0.001])
 % title('CVR SE, PetCO2')
 
-prcLOW_MD = prctile(median_CVRratio_BOLDGM_SE_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_CVRratio_BOLDGM_SE_subjs(:),high_prc);
-median_CVRratio_BOLDGM_SE_subjs(median_CVRratio_BOLDGM_SE_subjs<prcLOW_MD | median_CVRratio_BOLDGM_SE_subjs>prcHIGH_MD)=NaN;
+prcLOW = prctile(median_CVRratio_BOLDGM_SE_subjs(:),low_prc);
+prcHIGH = prctile(median_CVRratio_BOLDGM_SE_subjs(:),high_prc);
+median_CVRratio_BOLDGM_SE_subjs(median_CVRratio_BOLDGM_SE_subjs<prcLOW | median_CVRratio_BOLDGM_SE_subjs>prcHIGH)=NaN;
 
 % figure,
 % imagesc(rot90(median_CVRratio_BOLDGM_SE_subjs(:,:,round(dim(3)/2))))
@@ -737,14 +744,24 @@ median_CVRratio_BOLDGM_SE_subjs(median_CVRratio_BOLDGM_SE_subjs<prcLOW_MD | medi
 
 
 %% MD
-prcLOW_MD = prctile(median_MD_map_tissue_subjs(:),low_prc);
-prcHIGH_MD = prctile(median_MD_map_tissue_subjs(:),high_prc);
-median_MD_map_tissue_subjs(median_MD_map_tissue_subjs<prcLOW_MD | median_MD_map_tissue_subjs>prcHIGH_MD)=NaN;
+prcLOW = prctile(median_MD_map_tissue_subjs(:),low_prc);
+prcHIGH = prctile(median_MD_map_tissue_subjs(:),high_prc);
+median_MD_map_tissue_subjs(median_MD_map_tissue_subjs<prcLOW | median_MD_map_tissue_subjs>prcHIGH)=NaN;
 
 % figure,
 % imagesc(rot90(median_MD_map_tissue_subjs(:,:,round(dim(3)/2))))
 % %caxis([0,0.001])
 % title('Mean Diffusivity Map')
+
+%% PVE
+prcLOW = prctile(median_PVE_tissue_cvr_maps,low_prc);
+prcHIGH = prctile(median_PVE_tissue_cvr_maps,high_prc);
+median_PVE_tissue_cvr_maps(median_PVE_tissue_cvr_maps<prcLOW | median_PVE_tissue_cvr_maps>prcHIGH)=NaN;
+
+prcLOW = prctile(median_PVE_tissue_dwi_maps,low_prc);
+prcHIGH = prctile(median_PVE_tissue_dwi_maps,high_prc);
+median_PVE_tissue_dwi_maps(median_PVE_tissue_dwi_maps<prcLOW | median_PVE_tissue_dwi_maps>prcHIGH)=NaN;
+
 
 %% CVR GE
 
@@ -1793,18 +1810,233 @@ title(strcat('CVR Ratio CVR\_BOLDGE/CVR\_BOLDSE vs MD, tissue=',tissue),'FontWei
 
 idx_MD = find(isnan(median_MD_map_tissue_subjs(:)));
 idx_CVRmap = find(isnan(median_CVRratio_GEoverSE_BOLDGM_tissue_subjs(:)));
-idx_tot = unique(cat(1,idx_MD,idx_CVRmap));
+idx_PVE = find(isnan(median_PVE_tissue_dwi_maps(:)));
+% idx_PVE = find(isnan(median_PVE_tissue_cvr_maps(:)));
+idx_tot = unique(cat(1,idx_MD,idx_CVRmap,idx_PVE));
 
 x = median_MD_map_tissue_subjs(:);
 y = median_CVRratio_GEoverSE_BOLDGM_tissue_subjs(:);
+PVE = median_PVE_tissue_dwi_maps(:);
 
 x(idx_tot)=[];
 y(idx_tot)=[];
+PVE(idx_tot)=[];
+
 x=zscore(x);
 y=zscore(y);
+PVE=zscore(PVE);
 
-tbl=table(x,y, 'VariableNames', ...
-    {'MD','CVRratio'});
+tbl=table(x,y,PVE, 'VariableNames', ...
+    {'MD','CVRratio','PVE'});%being tissue='GM', PVE is GM PVE
 %build your model
-mdl=fitlm(tbl,'CVRratio ~ MD','RobustOpts','on')
+mdl=fitlm(tbl,'CVRratio ~ MD + PVE','RobustOpts','on')%+ PVE
 
+%% study the dependence of SE and GE signal on diffusion MD 
+% in regions divided according to the size of arteries
+
+% the distribution of intensity of the image obtained through nearest
+% neighbor is much more similar to the original
+
+img_path_venous_density_prob = '/media/nas_rete/Work_manuela/DEXIGESEDiffProject/SUBJ2MNI/MEAN_Harvard_Oxford_swi_ved_on_MNI152_T1_2mm_brain.nii.gz';
+V_vol_venous_density_prob = spm_vol(img_path_venous_density_prob);
+V_venous_density_prob=spm_read_vols(V_vol_venous_density_prob);
+
+img_path_venous_density_cortlabels = '/usr/local/fsl/data/atlases/HarvardOxford/HarvardOxford-cort-maxprob-thr25-2mm.nii.gz';
+V_vol_venous_density_cortlabels = spm_vol(img_path_venous_density_cortlabels);
+V_venous_density_cortlabels=spm_read_vols(V_vol_venous_density_cortlabels);
+
+% figure, imagesc(rot90(V_venous_density_cortlabels(:,:,45)))
+
+cortregions = unique(V_venous_density_cortlabels(:));
+cortregions(cortregions==0)=[];
+
+% img_path_venous_density_subcortlabels = '/usr/local/fsl/data/atlases/HarvardOxford/HarvardOxford-sub-maxprob-thr25-2mm.nii.gz';
+% V_vol_venous_density_subcortlabels = spm_vol(img_path_venous_density_subcortlabels);
+% V_venous_density_subcortlabels=spm_read_vols(V_vol_venous_density_subcortlabels);
+% 
+% figure, imagesc(rot90(V_venous_density_subcortlabels(:,:,45)))
+% 
+% subcortregions = unique(V_venous_density_subcortlabels(:));
+% subcortregions(subcortregions==0)=[];
+
+
+%%%%%% analysis for each subject
+
+MD_regional_vessatlas_median_subjs = [];
+CVRratio_regional_vessatlas_median_subjs =  [];
+
+corrcoef_cvrratiovsMD_region_vessatlas_subjs = []; 
+prob_venous_density_regional_subjs = [];
+
+
+
+for subj = 1:n_subjs
+
+    disp(strcat('subj',num2str(subj)))
+    
+    MD_regional_vessatlas_median_subj = [];
+    CVRratio_regional_vessatlas_median_subj =  [];
+
+    corrcoef_cvrratiovsMD_region_vessatlas_subj =  [];
+    prob_venous_density_regional_subj = [];
+
+
+    CVRratio_GEoverSE_BOLDGM_tissue = CVRratio_GEoverSE_BOLDGM_tissue_subjs{subj};
+    MD_map_tissue = MD_map_tissue_subjs{subj};
+                        
+
+    V_venous_density_cortlabels_mask=V_venous_density_cortlabels; 
+    V_venous_density_prob_mask=V_venous_density_prob;
+
+    for region = 1:length(cortregions)
+
+        for ii = 1:length(V_venous_density_cortlabels(:))
+            if V_venous_density_cortlabels(ii) == cortregions(region)
+                V_venous_density_cortlabels_mask(ii) = 1;
+            else
+                V_venous_density_cortlabels_mask(ii) = 0;
+            end
+        end
+
+        MD_regional = V_venous_density_cortlabels_mask.*MD_map_tissue;
+        CVRratio_regional =  V_venous_density_cortlabels_mask.*CVRratio_GEoverSE_BOLDGM_tissue;
+        prob_venous_density_regional = V_venous_density_cortlabels_mask.*V_venous_density_prob_mask;
+ 
+
+        MD_regional(V_venous_density_cortlabels_mask==0)=[];
+        CVRratio_regional(V_venous_density_cortlabels_mask==0)=[];
+        prob_venous_density_regional(prob_venous_density_regional==0)=[];
+
+        MD_regional_vessatlas_median = median(MD_regional(:));
+        CVRratio_regional_vessatlas_median =  median(CVRratio_regional(:));
+        [r,p] = corrcoef(MD_regional(:),CVRratio_regional(:),'rows','complete');
+
+        MD_regional_vessatlas_median_subj(end+1) = MD_regional_vessatlas_median;
+        CVRratio_regional_vessatlas_median_subj(end+1) =  CVRratio_regional_vessatlas_median;
+        corrcoef_cvrratiovsMD_region_vessatlas_subj(end+1) =  r(2);  
+        prob_venous_density_regional_subj(end+1) = median(prob_venous_density_regional);
+
+
+
+    end
+    
+    MD_regional_vessatlas_median_subjs(subj,1:length(cortregions)) = MD_regional_vessatlas_median_subj;
+    CVRratio_regional_vessatlas_median_subjs(subj,1:length(cortregions)) =  CVRratio_regional_vessatlas_median_subj;
+    corrcoef_cvrratiovsMD_region_vessatlas_subjs(subj,1:length(cortregions)) =  corrcoef_cvrratiovsMD_region_vessatlas_subj;  
+    prob_venous_density_regional_subjs(subj,1:length(cortregions)) = prob_venous_density_regional_subj;
+
+end
+
+%%
+
+figure,
+for subj = 1:n_subjs
+subplot(4,5,subj)
+scatter(prob_venous_density_regional_subjs(subj,:),corrcoef_cvrratiovsMD_region_vessatlas_subjs(subj,:),"filled",SizeData=50)
+set(get(gca, 'XAxis'), 'FontWeight', 'bold','FontSize',14);
+set(get(gca, 'YAxis'), 'FontWeight', 'bold','FontSize',14);
+set(gca,'box','off')
+% ylabel('r','FontWeight','bold','FontSize',19,'FontName','Calibri')
+% xlabel('Prob venous density','FontWeight','bold','FontSize',19,'FontName','Calibri')
+title(strcat('subj-',num2str(subj)), 'FontWeight', 'bold','FontSize',14)
+sgtitle('Correlation Coefficient (CVRratio vs MD) vs venous density', 'FontWeight', 'bold','FontSize',18)
+ylim([-0.2,0.35])
+grid on
+end
+
+%%
+%%%%%%% working on the map of median across subjects
+
+
+
+MD_regional_vessatlas_medians_tot = [];
+CVRratio_regional_vessatlas_medians_tot =  [];
+
+
+corrcoef_cvrratiovsMD_region_vessatlas_tot =  [];
+prob_venous_density_regional_tot = [];
+
+
+corrcoef_CVRSEvsMD_region_vessatlas_tot = [];                 
+corrcoef_CVRGEvsMD_region_vessatlas_tot = [];                 
+
+
+for region = 1:length(cortregions)
+
+    V_venous_density_cortlabels_mask=V_venous_density_cortlabels; 
+    V_venous_density_prob_mask=V_venous_density_prob;
+
+    for ii = 1:length(V_venous_density_cortlabels(:))
+        if V_venous_density_cortlabels(ii) == cortregions(region)
+            V_venous_density_cortlabels_mask(ii) = 1;
+        else
+            V_venous_density_cortlabels_mask(ii) = 0;
+        end
+    end
+
+    MD_regional = V_venous_density_cortlabels_mask.*median_MD_map_tissue_subjs;
+    CVRratio_regional =  V_venous_density_cortlabels_mask.*median_CVRratio_GEoverSE_BOLDGM_tissue_subjs;
+    prob_venous_density_regional = V_venous_density_cortlabels_mask.*V_venous_density_prob_mask;
+    CVRBOLD_GE_regional = V_venous_density_cortlabels_mask.*median_BOLDGM_CVRBOLD_GE_map_tissue_subjs;
+    CVRBOLD_SE_regional = V_venous_density_cortlabels_mask.*median_BOLDGM_CVRBOLD_SE_map_tissue_subjs;
+
+
+    MD_regional(V_venous_density_cortlabels_mask==0)=[];
+    CVRratio_regional(V_venous_density_cortlabels_mask==0)=[];
+    prob_venous_density_regional(prob_venous_density_regional==0)=[];
+    CVRBOLD_GE_regional(V_venous_density_cortlabels_mask==0)=[];
+    CVRBOLD_SE_regional(V_venous_density_cortlabels_mask==0)=[];
+
+    MD_regional_vessatlas_median = median(MD_regional(:));
+    CVRratio_regional_vessatlas_median =  median(CVRratio_regional(:));
+    CVRBOLD_GE_regional_median = median(CVRBOLD_GE_regional(:));
+    CVRBOLD_SE_regional_median = median(CVRBOLD_SE_regional(:));
+
+    [r_cvrratiovsMD,p] = corrcoef(MD_regional(:),CVRratio_regional(:),'rows','complete');
+    [r_CVRSEvsMD,p] = corrcoef(MD_regional(:),CVRBOLD_SE_regional(:),'rows','complete');
+    [r_CVRGEvsMD,p] = corrcoef(MD_regional(:),CVRBOLD_GE_regional(:),'rows','complete');
+
+    MD_regional_vessatlas_medians_tot(end+1) = MD_regional_vessatlas_median;
+    CVRratio_regional_vessatlas_medians_tot(end+1) =  CVRratio_regional_vessatlas_median;
+    corrcoef_cvrratiovsMD_region_vessatlas_tot(end+1) =  r_cvrratiovsMD(2);  
+    corrcoef_CVRSEvsMD_region_vessatlas_tot(end+1) =  r_CVRSEvsMD(2);  
+    corrcoef_CVRGEvsMD_region_vessatlas_tot(end+1) =  r_CVRGEvsMD(2);  
+    prob_venous_density_regional_tot(end+1) = median(prob_venous_density_regional);
+
+
+
+end
+
+figure,
+scatter(prob_venous_density_regional_tot,corrcoef_cvrratiovsMD_region_vessatlas_tot,"filled",SizeData=50)
+set(get(gca, 'XAxis'), 'FontWeight', 'bold','FontSize',14);
+set(get(gca, 'YAxis'), 'FontWeight', 'bold','FontSize',14);
+set(gca,'box','off')
+ylabel('Correlation Coefficient, r','FontWeight','bold','FontSize',19,'FontName','Calibri')
+xlabel('Prob venous density','FontWeight','bold','FontSize',19,'FontName','Calibri')
+title('CVRratio vs MD')
+% ylim([-0.2,0.4])
+grid on
+
+
+figure,
+scatter(prob_venous_density_regional_tot,corrcoef_CVRSEvsMD_region_vessatlas_tot,"filled",SizeData=50)
+set(get(gca, 'XAxis'), 'FontWeight', 'bold','FontSize',14);
+set(get(gca, 'YAxis'), 'FontWeight', 'bold','FontSize',14);
+set(gca,'box','off')
+ylabel('Correlation Coefficient, r','FontWeight','bold','FontSize',19,'FontName','Calibri')
+xlabel('Prob venous density','FontWeight','bold','FontSize',19,'FontName','Calibri')
+title('CVR SPIN ECHO vs MD')
+% ylim([-0.2,0.4])
+grid on
+
+figure,
+scatter(prob_venous_density_regional_tot,corrcoef_CVRGEvsMD_region_vessatlas_tot,"filled",SizeData=50)
+set(get(gca, 'XAxis'), 'FontWeight', 'bold','FontSize',14);
+set(get(gca, 'YAxis'), 'FontWeight', 'bold','FontSize',14);
+set(gca,'box','off')
+ylabel('Correlation Coefficient, r','FontWeight','bold','FontSize',19,'FontName','Calibri')
+xlabel('Prob venous density','FontWeight','bold','FontSize',19,'FontName','Calibri')
+title('CVR GRADIENT ECHO vs MD')
+% ylim([-0.2,0.4])
+grid on
