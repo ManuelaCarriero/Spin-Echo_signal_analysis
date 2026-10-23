@@ -2313,8 +2313,6 @@ xlabel('Venous Density (%)','FontWeight','bold','FontSize',19,'FontName','Calibr
 sgtitle('Effects of Macrovascular Venous Density','FontWeight','bold','FontSize',25,'FontName','Calibri')
 grid on
 
-%%
-% check MD dependence on macrovascular density
 
 
 %% corr coef trends
@@ -2397,6 +2395,77 @@ title('GE-BOLD-CVR vs MD','FontSize',25)
 % ylim([-0.4,0.8])
 sgtitle('CVRs vs MD','FontWeight','bold','FontSize',25,'FontName','Calibri')
 grid on
+
+%% boxplots of regression coefficient estimates
+
+venous_density_threshold = 10;
+
+low_venous_density_cvrBOLDSEvsMD = estimate_regional_cvrBOLDSEvsMD_tot(prob_venous_density_regional_tot<venous_density_threshold);
+high_venous_density_cvrBOLDSEvsMD = estimate_regional_cvrBOLDSEvsMD_tot(prob_venous_density_regional_tot>=venous_density_threshold);
+
+low_venous_density_cvrBOLDGEvsMD = estimate_regional_cvrBOLDGEvsMD_tot(prob_venous_density_regional_tot<venous_density_threshold);
+high_venous_density_cvrBOLDGEvsMD = estimate_regional_cvrBOLDGEvsMD_tot(prob_venous_density_regional_tot>=venous_density_threshold);
+
+low_venous_density_cvrratiovsMD = estimate_regional_cvrratiovsMD_tot(prob_venous_density_regional_tot<venous_density_threshold);
+high_venous_density_cvrratiovsMD = estimate_regional_cvrratiovsMD_tot(prob_venous_density_regional_tot>=venous_density_threshold);
+
+
+
+% create data matrix
+estimates_cvrBOLDSEvsMD_mat = [low_venous_density_cvrBOLDSEvsMD';high_venous_density_cvrBOLDSEvsMD'];
+estimates_cvrBOLDGEvsMD_mat = [low_venous_density_cvrBOLDGEvsMD';high_venous_density_cvrBOLDGEvsMD'];
+estimates_cvrratiovsMD_mat = [low_venous_density_cvrratiovsMD';high_venous_density_cvrratiovsMD'];
+
+%%
+% choose which CVR vs MD to plot the regression coefficient estimates
+figure; hold on
+
+for i = 1:3
+    subplot(1,3,i); hold on
+    var = {'CVRratio','GE','SE'};
+    var_name = var{i};
+
+    if strcmp(var_name,'SE')
+        data = estimates_cvrBOLDSEvsMD_mat;
+        groups = [ones(numel(low_venous_density_cvrBOLDSEvsMD),1); 2*ones(numel(high_venous_density_cvrBOLDSEvsMD),1)];
+    elseif strcmp(var_name,'GE')
+        data = estimates_cvrBOLDGEvsMD_mat;
+        groups = [ones(numel(low_venous_density_cvrBOLDGEvsMD),1); 2*ones(numel(high_venous_density_cvrBOLDGEvsMD),1)];
+    elseif strcmp(var_name,'CVRratio')
+        data = estimates_cvrratiovsMD_mat;
+        groups = [ones(numel(low_venous_density_cvrratiovsMD),1); 2*ones(numel(high_venous_density_cvrratiovsMD),1)];
+    end
+
+
+    % Boxplots
+    boxplot(data, groups, 'Labels', {'Low', 'High'}, ...
+        'Widths', 0.9, 'Symbol', '');          % hide default outliers (points are shown below)
+
+    % Scatter of individual points with horizontal jitter
+    jit = 0.15;
+    xj  = groups + jit*(rand(size(groups)) - 0.5)*2;
+    scatter(xj, data, 20, 'k', 'filled');
+
+    % Linear regression of the values on the group position (1 and 2)
+    p  = polyfit(groups, data, 1);             % p(1) = slope, p(2) = intercept
+    xf = [1 2];
+    plot(xf, polyval(p, xf), 'r-o', 'LineWidth', 2, 'MarkerFaceColor', 'r');
+    set(get(gca, 'XAxis'), 'FontWeight', 'bold','FontSize',12);
+    set(get(gca, 'YAxis'), 'FontWeight', 'bold','FontSize',12);
+    set(gca,'box','off')
+    ylabel('Regression Coefficient (%s/mm^2)','FontWeight','bold','FontSize',12,'FontName','Calibri')
+    xlabel('Venous Density (%)','FontWeight','bold','FontSize',12,'FontName','Calibri')
+    if strcmp(var_name,'SE')
+        title('SE-BOLD-CVR vs MD','FontWeight','bold','FontSize',18,'FontName','Calibri')
+    elseif strcmp(var_name,'GE')
+        title('GE-BOLD-CVR vs MD','FontWeight','bold','FontSize',18,'FontName','Calibri')
+    elseif strcmp(var_name,'CVRratio')
+        title('CVRratio vs MD','FontWeight','bold','FontSize',18,'FontName','Calibri')
+    end
+    grid on
+    box on
+    hold off
+end
 
 %% pvalues
 
